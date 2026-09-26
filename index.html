@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Velocity Intelligence Network — Platform Demonstration</title>
+<style>
+:root{
+  color-scheme:light;
+  --navy:#16294e; --heading:#16294e; --ink:#1d2c48; --blue:#1f66f0; --blue2:#38b0ff;
+  --bg:#f2f6fc; --bg2:#f6f9fe; --card:#ffffff; --card2:#fbfdff; --field:#f8fafd;
+  --line:#e3eaf5; --line2:#eef2f9; --muted:#69799a;
+  --good:#0e9f6e; --goodbg:#e6f7f0; --goodline:#bfe8d8;
+  --warn:#d97706; --warnbg:#fdf3e3; --warnline:#f3ddb6;
+  --bad:#dc2626; --badbg:#fdecec; --badline:#f3cdcd;
+  --chipbg:#eef4ff; --chipline:#d7e4fb; --hover-line:#bcd3fb; --hoverbg:#f3f8ff;
+  --recbg:#f5f9ff; --recline:#dce8fc; --hlbg:#fffaf1; --barbg:#e8eef8; --barfill2:#b9d2fa;
+  --glow1:#e4efff; --glow2:#e9f3ff;
+  --shadow:0 1px 3px rgba(22,41,78,.07),0 8px 24px rgba(22,41,78,.06);
+  --grad:linear-gradient(135deg,#1f66f0,#38b0ff);
+  --logo-check:#16294e;
+}
+html[data-theme="dark"]{
+  color-scheme:dark;
+  --heading:#e9effc; --ink:#c8d4ea; --muted:#8598ba;
+  --bg:#0a111e; --bg2:#0d1728; --card:#121c2f; --card2:#17233b; --field:#0e1828;
+  --line:#243452; --line2:#1c2a42;
+  --good:#34d399; --goodbg:rgba(52,211,153,.13); --goodline:#1e4a3a;
+  --warn:#fbbf24; --warnbg:rgba(251,191,36,.12); --warnline:#57431c;
+  --bad:#f87171; --badbg:rgba(248,113,113,.12); --badline:#5a2c2c;
+  --blue:#5b95ff;
+  --chipbg:#16274a; --chipline:#2b4576; --hover-line:#3a5c94; --hoverbg:#16233c;
+  --recbg:#142440; --recline:#27436f; --hlbg:#2a2416; --barbg:#1a2740; --barfill2:#2f4d7e;
+  --glow1:rgba(31,102,240,.10); --glow2:rgba(56,176,255,.05);
+  --shadow:0 1px 3px rgba(0,0,0,.5),0 10px 30px rgba(0,0,0,.4);
+  --logo-check:#dbe7ff;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer}
+h1,h2,h3{color:var(--heading)}
+
+/* ---------- LOGIN / PERSONA SELECT ---------- */
+#login{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;
+  background:radial-gradient(1100px 600px at 70% -10%,var(--glow1) 0%,rgba(244,247,252,0) 60%),radial-gradient(900px 500px at 10% 110%,var(--glow2) 0%,rgba(244,247,252,0) 55%),var(--bg)}
+#login .logo-wrap{margin-bottom:8px}
+#login .tag{color:var(--muted);font-size:15px;margin:14px 0 42px;text-align:center;max-width:520px;line-height:1.55}
+#login .tag b{color:var(--heading)}
+.persona-grid{display:flex;gap:22px;flex-wrap:wrap;justify-content:center;max-width:1080px}
+.persona-card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);width:300px;padding:28px 26px 24px;text-align:left;transition:transform .18s ease,box-shadow .18s ease,border-color .18s;position:relative;overflow:hidden;display:flex;flex-direction:column}
+.persona-card:hover{transform:translateY(-4px);box-shadow:0 14px 34px rgba(22,41,78,.14);border-color:var(--hover-line)}
+.persona-card .pc-top{height:4px;background:var(--grad);position:absolute;top:0;left:0;right:0}
+.persona-card .avatar{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:#fff;margin-bottom:16px}
+.persona-card h3{font-size:17px;margin-bottom:2px}
+.persona-card .role{color:var(--blue);font-size:12.5px;font-weight:600;margin-bottom:12px}
+.persona-card p{color:var(--muted);font-size:13px;line-height:1.55;margin-bottom:18px;min-height:62px}
+.persona-card .enter{width:100%;background:var(--navy);color:#fff;border:none;border-radius:10px;padding:11px;font-size:13.5px;font-weight:600;transition:background .15s;margin-top:auto}
+.persona-card .enter:hover{background:#0f1d3a}
+#login .demo-note{margin-top:40px;color:var(--muted);font-size:12px;letter-spacing:.4px}
+
+/* ---------- APP SHELL ---------- */
+#app{display:none;height:100vh;overflow:hidden}
+#app.active{display:flex}
+.sidebar{width:232px;background:var(--navy);color:#c7d5f2;display:flex;flex-direction:column;flex-shrink:0}
+.sidebar .brand{padding:20px 18px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.08)}
+.sidebar .brand .bname{font-weight:700;color:#fff;font-size:16px;letter-spacing:.2px}
+.sidebar .brand .bsub{font-size:9.5px;color:#8fa5d4;letter-spacing:.8px;text-transform:uppercase}
+.nav{padding:14px 10px;flex:1;overflow-y:auto}
+.nav .nav-label{font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:#7b90bf;padding:10px 10px 6px}
+.nav a{display:flex;align-items:center;gap:11px;color:#c7d5f2;text-decoration:none;padding:10px 12px;border-radius:9px;font-size:13.5px;margin-bottom:2px;transition:background .12s}
+.nav a:hover{background:rgba(255,255,255,.07)}
+.nav a.active{background:rgba(56,176,255,.16);color:#fff;font-weight:600}
+.nav a .ico{width:18px;text-align:center;font-size:15px;opacity:.9}
+.sidebar .side-foot{padding:14px 16px;border-top:1px solid rgba(255,255,255,.08);font-size:11px;color:#7b90bf;line-height:1.5}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{height:60px;background:var(--card);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 22px;gap:14px;flex-shrink:0}
+.scope{display:flex;align-items:center;gap:8px;background:var(--chipbg);border:1px solid var(--chipline);border-radius:9px;padding:7px 13px;font-size:12.5px;font-weight:600;color:var(--heading)}
+.scope .sc-caret{color:var(--blue);font-size:10px}
+.searchbar{flex:1;max-width:430px;position:relative}
+.searchbar input{width:100%;border:1px solid var(--line);border-radius:9px;padding:9px 12px 9px 34px;font-size:13px;background:var(--field);color:var(--ink)}
+.searchbar .mag{position:absolute;left:11px;top:8px;color:var(--muted)}
+.topbar .spacer{flex:1}
+.vinessa-btn{display:flex;align-items:center;gap:9px;background:var(--grad);color:#fff;border:none;border-radius:22px;padding:9px 18px 9px 12px;font-size:13px;font-weight:600;box-shadow:0 4px 14px rgba(31,102,240,.35);transition:transform .15s}
+.vinessa-btn:hover{transform:scale(1.04)}
+.vinessa-btn .pulse{width:9px;height:9px;background:#fff;border-radius:50%;animation:pul 1.8s infinite}
+@keyframes pul{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.75)}}
+.userchip{display:flex;align-items:center;gap:10px}
+.userchip .avatar{width:36px;height:36px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
+.userchip .uname{font-size:13px;font-weight:600;color:var(--heading);line-height:1.2}
+.userchip .urole{font-size:11px;color:var(--muted)}
+.switch-link{background:none;border:none;color:var(--blue);font-size:11.5px;font-weight:600;padding:0;margin-left:4px}
+.content{flex:1;overflow-y:auto;padding:26px 30px 60px;scroll-behavior:smooth}
+.page{display:none;max-width:1180px;margin:0 auto}
+.page.active{display:block}
+
+/* ---------- COMPONENTS ---------- */
+.greeting h1{font-size:22px;margin-bottom:4px}
+.greeting .sub{color:var(--muted);font-size:13.5px;margin-bottom:20px}
+.brief{background:linear-gradient(135deg,#17305f,#1c3f85 60%,#1f57b8);border-radius:16px;padding:20px 24px;color:#e8f0ff;margin-bottom:24px;position:relative;overflow:hidden}
+.brief:before{content:'';position:absolute;right:-60px;top:-80px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(56,176,255,.35),transparent 70%)}
+.brief .b-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;font-weight:700;font-size:14px;color:#fff}
+.brief ul{list-style:none}
+.brief li{display:flex;gap:10px;padding:5px 0;font-size:13.5px;line-height:1.5;color:#dbe7ff}
+.brief li .dot{color:#4fc3ff;font-weight:700}
+.brief .b-act{margin-top:14px}
+.kpis{display:flex;gap:14px;margin-bottom:26px;overflow-x:auto;padding-bottom:6px;scrollbar-width:thin}
+.kpis .kpi{flex:0 0 185px;min-width:185px}
+.kpis::-webkit-scrollbar{height:8px}
+.kpis::-webkit-scrollbar-thumb{background:var(--line);border-radius:8px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow)}
+.kpi .k-label{font-size:11.5px;color:var(--muted);font-weight:600;letter-spacing:.3px;text-transform:uppercase;margin-bottom:8px}
+.kpi .k-val{font-size:24px;font-weight:700;color:var(--heading);line-height:1}
+.kpi .k-delta{font-size:11.5px;font-weight:600;margin-top:8px;display:inline-flex;align-items:center;gap:4px;border-radius:6px;padding:3px 7px}
+.up{color:var(--good);background:var(--goodbg)} .down{color:var(--bad);background:var(--badbg)} .flat{color:var(--warn);background:var(--warnbg)}
+.section-title{display:flex;align-items:center;justify-content:space-between;margin:26px 0 14px}
+.section-title h2{font-size:16px}
+.section-title .st-sub{font-size:12px;color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:20px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid32{display:grid;grid-template-columns:3fr 2fr;gap:18px}
+@media(max-width:1000px){.grid2,.grid32{grid-template-columns:1fr}}
+
+/* decision cards */
+.decisions{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.decision{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--blue);border-radius:14px;padding:18px;box-shadow:var(--shadow);display:flex;flex-direction:column}
+.decision.risk{border-left-color:var(--bad)} .decision.watch{border-left-color:var(--warn)} .decision.save{border-left-color:var(--good)}
+.decision .d-tag{font-size:10.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px;display:inline-flex;align-items:center;gap:6px}
+.decision.risk .d-tag{color:var(--bad)} .decision.watch .d-tag{color:var(--warn)} .decision.save .d-tag{color:var(--good)} .decision .d-tag.blue{color:var(--blue)}
+.decision h3{font-size:14.5px;margin-bottom:8px;line-height:1.4}
+.decision p{font-size:12.5px;color:var(--muted);line-height:1.55;flex:1}
+.decision .d-rec{margin-top:12px;background:var(--recbg);border:1px solid var(--recline);border-radius:10px;padding:10px 12px;font-size:12.5px;color:var(--heading);line-height:1.5}
+.decision .d-rec b{color:var(--blue)}
+.decision .d-actions{display:flex;gap:8px;margin-top:14px}
+.btn{border:none;border-radius:9px;padding:9px 15px;font-size:12.5px;font-weight:600;transition:all .15s}
+.btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:#1553cc}
+.btn-ghost{background:var(--card);color:var(--heading);border:1px solid var(--line)}.btn-ghost:hover{border-color:var(--hover-line)}
+.btn-approved{background:var(--goodbg)!important;color:var(--good)!important;border:1px solid var(--goodline)!important;cursor:default}
+.btn-nav{background:var(--grad);color:#fff}
+.vin-chip{display:inline-flex;align-items:center;gap:6px;background:var(--chipbg);color:var(--blue);border-radius:14px;padding:3px 10px;font-size:11px;font-weight:700}
+
+/* tables */
+table.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{text-align:left;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);padding:9px 12px;border-bottom:1.5px solid var(--line);white-space:nowrap}
+.tbl td{padding:12px;border-bottom:1px solid var(--line2);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr.hl td{background:var(--card)af1}
+.tbl .best{color:var(--good);font-weight:700}.tbl .worst{color:var(--bad);font-weight:700}
+.pill{display:inline-block;border-radius:12px;padding:3px 10px;font-size:11.5px;font-weight:600}
+.pill.g{background:var(--goodbg);color:var(--good)}.pill.w{background:var(--warnbg);color:var(--warn)}.pill.r{background:var(--badbg);color:var(--bad)}.pill.b{background:var(--chipbg);color:var(--blue)}.pill.n{background:var(--line2);color:var(--muted)}
+.bar{height:7px;border-radius:4px;background:var(--barbg);overflow:hidden;min-width:70px}
+.bar i{display:block;height:100%;border-radius:4px;background:var(--grad)}
+.bar.warn i{background:linear-gradient(90deg,#f59e0b,#fbbf24)} .bar.bad i{background:linear-gradient(90deg,#dc2626,#f87171)}
+.agency-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;vertical-align:1px}
+.rank{font-weight:700;color:var(--heading)}
+
+/* shift board */
+.shift-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:900px){.shift-grid{grid-template-columns:1fr}}
+.shift{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:var(--card2)}
+.shift.risk{border-color:var(--badline);background:var(--card)afa}
+.shift .s-name{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:flex;justify-content:space-between}
+.shift .s-fill{font-size:20px;font-weight:700;color:var(--heading);margin-bottom:8px}
+.shift .s-fill small{font-size:12px;color:var(--muted);font-weight:600}
+
+/* chat / VINessa */
+#vin-overlay{position:fixed;inset:0;background:rgba(15,26,50,.35);opacity:0;pointer-events:none;transition:opacity .25s;z-index:40}
+#vin-overlay.open{opacity:1;pointer-events:auto}
+#vinessa{position:fixed;top:0;right:-480px;width:460px;max-width:96vw;height:100vh;background:var(--card);z-index:50;box-shadow:-12px 0 40px rgba(22,41,78,.18);display:flex;flex-direction:column;transition:right .3s cubic-bezier(.2,.8,.3,1)}
+#vinessa.open{right:0}
+.vin-head{background:var(--grad);color:#fff;padding:18px 20px;display:flex;align-items:center;gap:12px}
+.vin-head .v-orb{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;border:2px solid rgba(255,255,255,.5)}
+.vin-head .v-name{font-weight:700;font-size:15.5px}
+.vin-head .v-sub{font-size:11.5px;opacity:.85}
+.vin-head .v-close{margin-left:auto;background:rgba(255,255,255,.18);border:none;color:#fff;width:30px;height:30px;border-radius:8px;font-size:15px}
+.vin-body{flex:1;overflow-y:auto;padding:18px;background:var(--bg2)}
+.msg{max-width:88%;margin-bottom:14px;line-height:1.55;font-size:13px;animation:fadein .3s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.msg.vin{background:var(--card);border:1px solid var(--line);border-radius:4px 14px 14px 14px;padding:13px 15px;box-shadow:0 1px 3px rgba(22,41,78,.06)}
+.msg.user{background:var(--navy);color:#fff;border-radius:14px 4px 14px 14px;padding:11px 15px;margin-left:auto}
+.msg.vin b{color:var(--heading)}
+.msg.vin .m-tbl{width:100%;border-collapse:collapse;margin:10px 0 4px;font-size:12px}
+.msg.vin .m-tbl th{text-align:left;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.5px;padding:4px 6px;border-bottom:1px solid var(--line)}
+.msg.vin .m-tbl td{padding:6px;border-bottom:1px solid var(--line2)}
+.msg.vin .m-rec{background:var(--recbg);border:1px solid var(--recline);border-radius:10px;padding:10px 12px;margin-top:10px;font-size:12.5px}
+.msg.vin .m-rec b{color:var(--blue)}
+.msg.vin .m-act{display:flex;gap:8px;margin-top:10px}
+.typing{display:inline-flex;gap:5px;padding:13px 16px;background:var(--card);border:1px solid var(--line);border-radius:4px 14px 14px 14px}
+.typing i{width:7px;height:7px;border-radius:50%;background:#9fb6e6;animation:blink 1.2s infinite}
+.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:.3}40%{opacity:1}}
+.vin-sugs{padding:10px 16px;background:var(--bg2);border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px}
+.sug{background:var(--card);border:1px solid var(--chipline);color:var(--blue);border-radius:16px;padding:7px 13px;font-size:12px;font-weight:600;transition:all .13s}
+.sug:hover{background:var(--chipbg)}
+.vin-input{display:flex;gap:10px;padding:14px 16px;border-top:1px solid var(--line);background:var(--card)}
+.vin-input input{flex:1;border:1px solid var(--line);border-radius:22px;padding:11px 17px;font-size:13px;background:var(--field)}
+.vin-input button{background:var(--grad);border:none;color:#fff;border-radius:50%;width:42px;height:42px;font-size:16px}
+
+/* toast */
+#toast{position:fixed;bottom:26px;left:50%;transform:translate(-50%,80px);background:var(--navy);color:#fff;border-radius:12px;padding:13px 22px;font-size:13px;font-weight:600;box-shadow:0 10px 30px rgba(22,41,78,.35);transition:transform .3s cubic-bezier(.2,.8,.3,1);z-index:80;display:flex;align-items:center;gap:10px}
+#toast.show{transform:translate(-50%,0)}
+#toast .tick{color:#4ade80;font-size:15px}
+
+/* modal */
+#modal-wrap{position:fixed;inset:0;background:rgba(15,26,50,.4);display:none;align-items:center;justify-content:center;z-index:60;padding:20px}
+#modal-wrap.open{display:flex}
+.modal{background:var(--card);border-radius:18px;max-width:640px;width:100%;max-height:88vh;overflow-y:auto;padding:26px;box-shadow:0 24px 70px rgba(15,26,50,.3);animation:fadein .25s}
+.modal h3{font-size:17px;margin-bottom:4px}
+.modal .m-sub{color:var(--muted);font-size:12.5px;margin-bottom:18px}
+.alloc{display:flex;flex-direction:column;gap:10px;margin:14px 0}
+.alloc .a-row{display:flex;align-items:center;gap:12px}
+.alloc .a-name{width:190px;font-size:13px;font-weight:600;color:var(--heading)}
+.alloc .a-bar{flex:1}
+.alloc .a-n{width:80px;text-align:right;font-weight:700;color:var(--heading);font-size:13px}
+.notice{background:var(--chipbg);border:1px solid var(--chipline);border-radius:10px;padding:11px 14px;font-size:12.5px;color:var(--heading);line-height:1.5;margin:12px 0}
+.tenant-banner{background:linear-gradient(135deg,#0d3b66,#1f66f0);color:#fff;border-radius:14px;padding:14px 20px;font-size:13px;display:flex;align-items:center;gap:12px;margin-bottom:22px;line-height:1.5}
+.tenant-banner .lock{font-size:19px}
+.legend{display:flex;gap:16px;font-size:11.5px;color:var(--muted);margin-top:10px;flex-wrap:wrap}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.footer-note{text-align:center;color:var(--muted);font-size:11px;margin-top:44px;letter-spacing:.3px}
+
+/* ---------- DRILL-DOWN ---------- */
+.clickable{cursor:pointer}
+tr.clickable{transition:background .12s}
+tr.clickable:hover td{background:var(--hoverbg)}
+tr.clickable td:last-child:after{content:' ›';color:var(--muted);font-weight:700}
+.kpi{transition:transform .15s,box-shadow .15s,border-color .15s}
+.kpi.clickable:hover{border-color:var(--hover-line);transform:translateY(-2px);box-shadow:0 10px 26px rgba(22,41,78,.13)}
+.shift{transition:border-color .13s,background .13s}
+.shift.clickable:hover{border-color:var(--hover-line);background:var(--hoverbg)}
+.fac-block{border-radius:10px;padding:8px;margin:-8px -8px 8px;transition:background .13s}
+.fac-block.clickable:hover{background:var(--hoverbg)}
+.modal{position:relative}
+.modal.wide{max-width:920px}
+.m-x{position:absolute;top:18px;right:18px;background:var(--line2);border:none;width:32px;height:32px;border-radius:9px;font-size:14px;color:var(--muted)}
+.m-x:hover{background:var(--line)}
+.chiprow{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 16px}
+.chip{background:var(--chipbg);color:var(--heading);border:1px solid var(--chipline);border-radius:14px;padding:5px 12px;font-size:12px;font-weight:600}
+.dk{display:grid;grid-template-columns:repeat(auto-fit,minmax(122px,1fr));gap:10px;margin-bottom:16px}
+.dk .k{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.dk .k .l{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-weight:700}
+.dk .k .v{font-size:17px;font-weight:700;color:var(--heading);margin-top:3px}
+.dk .k .v small{font-size:11px;color:var(--muted);font-weight:600}
+.funnel{display:flex;gap:8px;margin:12px 0 16px}
+.fstage{flex:1;background:var(--recbg);border:1px solid var(--recline);border-radius:10px;padding:10px 6px;text-align:center}
+.fstage .fv{font-size:18px;font-weight:700;color:var(--heading)}
+.fstage .fl{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-top:2px}
+.fstage.dim{background:var(--card2);border-color:var(--line)}
+.fstage.dim .fv{color:var(--muted)}
+.tline{border-left:2px solid var(--recline);margin:10px 0 6px 6px;padding-left:16px}
+.tl{position:relative;padding:5px 0;font-size:12.5px;line-height:1.5}
+.tl:before{content:'';position:absolute;left:-21px;top:11px;width:8px;height:8px;border-radius:50%;background:var(--blue)}
+.tl .tt{color:var(--muted);font-size:11px;font-weight:600}
+.drill-h3{font-size:13.5px;color:var(--heading);margin:18px 0 8px}
+
+/* ===== merged additions: theme toggle, freshness, widgets, mobile ===== */
+.mode-btn{background:var(--card);border:1px solid var(--line);border-radius:9px;width:36px;height:36px;font-size:15px;display:flex;align-items:center;justify-content:center;color:var(--heading);flex-shrink:0}
+.mode-btn:hover{border-color:var(--hover-line)}
+#login{position:relative}
+.login-mode{position:absolute;top:18px;right:18px;z-index:5}
+.fresh{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--muted);white-space:nowrap}
+.fresh .fdot{width:7px;height:7px;border-radius:50%;background:var(--good);animation:pul 2s infinite}
+.wgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
+.wcard{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:16px 18px;position:relative}
+.wcard .w-x{position:absolute;top:10px;right:10px;border:none;background:none;color:var(--muted);font-size:13px;opacity:0;transition:.15s;border-radius:6px;width:24px;height:24px;cursor:pointer}
+.wcard:hover .w-x{opacity:1}
+.wcard .w-x:hover{background:var(--line2);color:var(--heading)}
+.wtitle{font-size:11.5px;color:var(--muted);font-weight:600;letter-spacing:.3px;text-transform:uppercase;margin-bottom:10px}
+.add-tile{border:1.5px dashed var(--line);border-radius:14px;background:none;min-height:110px;display:flex;align-items:center;justify-content:center;gap:8px;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;transition:.15s}
+.add-tile:hover{border-color:var(--blue);color:var(--blue);background:var(--hoverbg)}
+.wrow{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--line2);font-size:12.5px;color:var(--ink)}
+.wrow:last-child{border-bottom:none}
+.wrow .wv{font-weight:700;color:var(--heading);white-space:nowrap}
+.wbig{font-size:22px;font-weight:700;color:var(--heading)}
+.wsub{font-size:11.5px;color:var(--muted);margin-top:2px}
+.wbars{display:flex;align-items:flex-end;gap:6px;height:58px;margin-top:10px}
+.wbars .wb{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;justify-content:flex-end;height:100%}
+.wbars .wb i{display:block;width:100%;max-width:30px;border-radius:4px 4px 0 0;background:var(--grad)}
+.wbars .wb span{font-size:9px;color:var(--muted);white-space:nowrap}
+.picker-item{display:flex;gap:12px;align-items:flex-start;padding:13px 14px;border:1px solid var(--line);border-radius:12px;margin-bottom:10px;background:var(--card2)}
+.picker-item .pt{font-weight:700;color:var(--heading);font-size:13.5px}
+.picker-item .pd{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.5}
+.picker-item .pa{margin-left:auto;flex-shrink:0}
+@media(max-width:860px){
+  #app.active{display:block;height:auto;overflow:visible}
+  .main{height:auto}
+  .content{overflow:visible;padding:16px 14px 130px}
+  .sidebar{position:fixed;bottom:0;top:auto;left:0;right:0;width:100%;height:auto;flex-direction:row;z-index:45;padding:2px 6px calc(6px + env(safe-area-inset-bottom))}
+  .sidebar .brand,.sidebar .side-foot,.nav .nav-label{display:none}
+  .nav{display:flex;flex-direction:row;padding:4px 2px;overflow:visible}
+  .nav a{flex:1;flex-direction:column;gap:3px;font-size:10px;padding:7px 2px;margin:0;text-align:center;align-items:center;justify-content:center}
+  .nav a .ico{font-size:18px;width:auto}
+  .topbar{height:auto;flex-wrap:wrap;padding:10px 14px;gap:8px;position:sticky;top:0;z-index:30}
+  .searchbar{order:5;flex-basis:100%;max-width:none}
+  .userchip > div:last-child{display:none}
+  .greeting h1{font-size:19px}
+  .brief{padding:16px 18px}
+  .card{overflow-x:auto}
+  .card .tbl{min-width:560px}
+  .modal{padding:22px 16px}
+  #vinessa{width:100vw;max-width:100vw}
+  #toast{bottom:calc(78px + env(safe-area-inset-bottom));max-width:92vw;text-align:center}
+}
+
+/* ===== restored client views: filters, plan ticks, composition, intake ===== */
+.filterbar{display:flex;gap:10px;align-items:center;margin:0 0 14px;flex-wrap:wrap}
+.filterbar select{background:var(--card);border:1px solid var(--line);color:var(--ink);border-radius:9px;padding:8px 11px;font-size:12.5px;font-family:inherit;cursor:pointer}
+.filterbar select:focus{outline:none;border-color:var(--hover-line)}
+.filterbar .count{margin-left:auto;font-size:11.5px;color:var(--muted)}
+.seg{display:inline-flex;background:var(--field);border:1px solid var(--line);border-radius:9px;padding:3px;gap:2px}
+.seg button{border:none;background:none;color:var(--muted);padding:6px 12px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+.seg button.on{background:var(--card);color:var(--heading);box-shadow:var(--shadow)}
+.pmix{display:flex;height:14px;border-radius:8px;overflow:hidden;background:var(--barbg);margin:14px 0 10px}
+.pmix i{display:block;height:100%}
+.plegend{display:flex;gap:16px;flex-wrap:wrap;font-size:11.5px;color:var(--muted)}
+.plegend span{display:inline-flex;align-items:center;gap:6px}
+.spendrow{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--line2);flex-wrap:wrap;row-gap:8px}
+.spendrow:last-child{border-bottom:none}
+.spendrow .sn{width:170px;flex:0 0 170px;font-size:13px;font-weight:600;color:var(--heading)}
+.spendrow .sn small{display:block;font-weight:400;color:var(--muted);font-size:11px}
+.barwrap{flex:1;position:relative;min-width:120px}
+.plan-tick{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--muted);opacity:.55;border-radius:2px}
+.spendrow .amt{width:190px;flex:0 0 190px;text-align:right;font-size:12.5px;color:var(--ink)}
+.spendrow .amt b{color:var(--heading)}
+.tag-cs{font-size:10px;font-weight:700;letter-spacing:.5px;color:var(--blue);background:var(--chipbg);padding:2px 8px;border-radius:6px;border:1px solid var(--chipline);text-transform:uppercase}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:6px;letter-spacing:.3px;text-transform:uppercase}
+.field input,.field select,.field textarea{width:100%;background:var(--field);border:1px solid var(--line);border-radius:9px;color:var(--ink);padding:10px 12px;font-size:13.5px;font-family:inherit}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--hover-line)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:520px){.two-col{grid-template-columns:1fr}.spendrow .amt{width:auto;flex:1;text-align:left}}
+.add-kpi{border:1.5px dashed var(--line);background:none;box-shadow:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:var(--muted);font-size:11.5px;font-weight:600;cursor:pointer;border-radius:14px;min-height:92px;transition:.15s;font-family:inherit;flex:0 0 120px !important;min-width:120px !important}
+.add-kpi:hover{border-color:var(--blue);color:var(--blue);background:var(--hoverbg);transform:none;box-shadow:none}
+</style>
+</head>
+<body>
+
+<!-- ================= PERSONA SELECT ================= -->
+<div id="login">
+  <button class="mode-btn login-mode" onclick="toggleTheme()" title="Dark / light mode">🌙</button>
+  <div class="logo-wrap" id="logo-big"></div>
+  <div class="tag">Welcome to the <b>Velocity</b> demonstration environment for <b>Meridian Manufacturing</b> — two facilities, four staffing partners, 421 contingent workers. Choose a seat and experience the platform the way your team would.</div>
+  <div class="persona-grid">
+    <div class="persona-card">
+      <div class="pc-top"></div>
+      <div class="avatar" style="background:linear-gradient(135deg,#16294e,#3b5ea8)">DW</div>
+      <h3>Dana Whitfield</h3>
+      <div class="role">Client Executive · VP, Workforce Operations</div>
+      <p>Sees the whole program: spend, vendor performance, turnover, and risk across both facilities — with decisions prepared before she asks.</p>
+      <button class="enter" onclick="enterApp('exec')">Enter as Executive →</button>
+    </div>
+    <div class="persona-card">
+      <div class="pc-top"></div>
+      <div class="avatar" style="background:linear-gradient(135deg,#1f66f0,#38b0ff)">MR</div>
+      <h3>Marcus Reed</h3>
+      <div class="role">Client Operations · Eastport Plant</div>
+      <p>Runs the day: shift coverage, requisitions, candidate reviews, compliance renewals, and invoice exceptions — one queue, zero spreadsheets.</p>
+      <button class="enter" onclick="enterApp('ops')">Enter as Ops Manager →</button>
+    </div>
+    <div class="persona-card">
+      <div class="pc-top"></div>
+      <div class="avatar" style="background:linear-gradient(135deg,#0d9488,#34d399)">PS</div>
+      <h3>Priya Sharma</h3>
+      <div class="role">Staffing Partner · Summit Staffing Group</div>
+      <p>Your staffing partner's view: their reqs, their workers, their scorecard — and never a glimpse of a competitor's data.</p>
+      <button class="enter" onclick="enterApp('sup')">Enter as Supplier →</button>
+    </div>
+  </div>
+  <div class="demo-note">DEMONSTRATION PROTOTYPE · SAMPLE DATA · VELOCITY INTELLIGENCE NETWORK</div>
+</div>
+
+<!-- ================= APP SHELL ================= -->
+<div id="app">
+  <div class="sidebar">
+    <div class="brand"><span id="logo-mark"></span>
+      <div><div class="bname">Velocity</div><div class="bsub">Intelligence Network</div></div>
+    </div>
+    <div class="nav" id="nav"></div>
+    <div class="side-foot" id="side-foot"></div>
+  </div>
+  <div class="main">
+    <div class="topbar">
+      <div class="scope" id="scope"></div>
+      <div class="fresh"><span class="fdot"></span><span>Data as of 6:00 AM</span></div>
+      <div class="searchbar"><span class="mag">⌕</span><input placeholder="Search workers, reqs, suppliers, invoices…"></div>
+      <div class="spacer"></div>
+      <button class="mode-btn" onclick="toggleTheme()" title="Dark / light mode">🌙</button>
+      <button class="vinessa-btn" onclick="openVin()"><span class="pulse"></span> Ask VINessa</button>
+      <div class="userchip" id="userchip"></div>
+    </div>
+    <div class="content" id="content">
+
+<!-- ============ EXECUTIVE · COMMAND CENTER ============ -->
+<div class="page" id="page-exec-home">
+  <div class="greeting"><h1>Good morning, Dana</h1>
+  <div class="sub">Tuesday, July 14 · Enterprise view · Eastport &amp; Southgate · 4 staffing partners</div></div>
+
+  <div class="brief">
+    <div class="b-head"><span style="font-size:17px">✦</span> VINessa's Morning Brief <span class="vin-chip" style="background:rgba(255,255,255,.15);color:#bfe1ff">Prepared 6:00 AM</span></div>
+    <ul>
+      <li><span class="dot">●</span><span><b style="color:#fff">Monday's ramp is at risk.</b> Southgate 2nd shift is projected 12 workers short for the week-3 volume increase. I've prepared a redistribution plan — it needs your approval by 2:00 PM to hold the Monday start.</span></li>
+      <li><span class="dot">●</span><span><b style="color:#fff">IronBridge turnover is now 31.4%</b> (90-day), pulling your program average up 3 points. Reallocating new reqs would save an estimated <b style="color:#fff">$86K this quarter</b>.</span></li>
+      <li><span class="dot">●</span><span><b style="color:#fff">Everything else is on track.</b> Fill rate is up 2.1 pts month-over-month, compliance holds at 96.2%, and invoice cycle time improved to 6.4 days.</span></li>
+    </ul>
+    <div class="b-act"><button class="btn btn-nav" onclick="openVin('exec-brief')">Review with VINessa →</button></div>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="k-label">Active Workers</div><div class="k-val">421</div><span class="k-delta up">▲ 41 this month</span></div>
+    <div class="kpi"><div class="k-label">Fill Rate</div><div class="k-val">91.4%</div><span class="k-delta up">▲ 2.1 pts MoM</span></div>
+    <div class="kpi"><div class="k-label">90-Day Turnover</div><div class="k-val">24.1%</div><span class="k-delta flat">▲ 1.8 pts · watch</span></div>
+    <div class="kpi"><div class="k-label">Compliance</div><div class="k-val">96.2%</div><span class="k-delta up">14 items expiring</span></div>
+    <div class="kpi"><div class="k-label">Monthly Spend</div><div class="k-val">$1.42M</div><span class="k-delta flat">▲ 4.6% vs plan</span></div>
+    <div class="kpi"><div class="k-label">Invoices Pending</div><div class="k-val">$318K</div><span class="k-delta up">6.4 day cycle</span></div>
+    <button class="kpi add-kpi" onclick="openWidgetPicker()" title="Add a KPI to your command center"><span style="font-size:19px;line-height:1">＋</span><span>Add KPI</span></button>
+  </div>
+
+  <div class="section-title"><h2>Decisions awaiting you</h2><span class="st-sub">Prepared and prioritized by VINessa — not a to-do list, a decision list</span></div>
+  <div class="decisions">
+    <div class="decision risk">
+      <div class="d-tag">⚠ Staffing Risk · Southgate</div>
+      <h3>Monday's 2nd shift is projected 12 workers short</h3>
+      <p>Week-3 ramp adds 28 positions. IronBridge holds the open reqs but has filled only 43% of similar reqs within 5 days over the past 60 days.</p>
+      <div class="d-rec"><b>VINessa recommends:</b> Split the 28 positions — Summit 14, TalentFlow 9, IronBridge 5 — based on each partner's 48-hour fill history for 2nd-shift assembly roles. Confidence: 87%.</div>
+      <div class="d-actions"><button class="btn btn-primary" onclick="approve(this,'Redistribution approved — suppliers notified instantly')">Approve redistribution</button><button class="btn btn-ghost" onclick="modifyDecision('monday')">Modify</button><button class="btn btn-ghost" onclick="openVin('exec-monday')">Ask why</button></div>
+    </div>
+    <div class="decision save">
+      <div class="d-tag">$ Savings Opportunity · Program</div>
+      <h3>Rebalance req allocation away from IronBridge</h3>
+      <p>IronBridge's 90-day turnover (31.4%) is 12 pts above your program's best. Each early exit costs ~$2,340 in re-recruiting and lost productivity.</p>
+      <div class="d-rec"><b>VINessa recommends:</b> Shift default allocation from 40/35/25 to 45/20/35 (Summit / IronBridge / TalentFlow). Estimated impact: <b>$86K saved per quarter</b>.</div>
+      <div class="d-actions"><button class="btn btn-primary" onclick="approve(this,'Allocation policy updated across both facilities')">Approve new allocation</button><button class="btn btn-ghost" onclick="modifyDecision('alloc')">Modify</button><button class="btn btn-ghost" onclick="showPage('exec-suppliers')">Scorecards</button></div>
+    </div>
+    <div class="decision watch">
+      <div class="d-tag">▲ Invoice Exception · TalentFlow</div>
+      <h3>Invoice INV-2214 bills 37 OT hours above approved timesheets</h3>
+      <p>VINessa reconciled the invoice against approved time and found $2,178 in overtime billed without matching timesheet approvals at Southgate.</p>
+      <div class="d-rec"><b>VINessa recommends:</b> Hold this line item, auto-generate a dispute with the reconciliation attached, and release the remaining $41,822 for payment on time.</div>
+      <div class="d-actions"><button class="btn btn-primary" onclick="approve(this,'Dispute filed · clean balance released for payment')">Hold &amp; dispute</button><button class="btn btn-ghost" onclick="modifyDecision('invoice')">Modify</button><button class="btn btn-ghost" onclick="approve(this,'Routed to Finance with VINessa\'s reconciliation attached')">Route to Finance</button></div>
+    </div>
+    <div class="decision">
+      <div class="d-tag blue">✓ Compliance · Eastport</div>
+      <h3>14 forklift certifications expire within 10 days</h3>
+      <p>All 14 workers are on active assignments in Materials Handling. Letting them lapse would idle two receiving lines Monday week.</p>
+      <div class="d-rec"><b>VINessa recommends:</b> Auto-initiate renewals with the certified training vendor and schedule around posted shifts. Zero lost hours.</div>
+      <div class="d-actions"><button class="btn btn-primary" onclick="approve(this,'Renewals initiated — 14 workers scheduled around shifts')">Initiate renewals</button><button class="btn btn-ghost" onclick="modifyDecision('renewals')">Modify</button><button class="btn btn-ghost" onclick="openVin('exec-compliance')">Details</button></div>
+    </div>
+  </div>
+
+  <div class="section-title"><h2>Program at a glance</h2><span class="st-sub">Live across Eastport &amp; Southgate</span></div>
+  <div class="grid32">
+    <div class="card">
+      <h3 style="font-size:14px;margin-bottom:4px">Supplier performance — 90 days</h3>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px">VINessa ranks partners on fill speed, retention, compliance, and rate discipline.</div>
+      <table class="tbl">
+        <tr><th>Partner</th><th>Workers</th><th>Fill rate</th><th>Time to fill</th><th>90-day turnover</th><th>VINessa rank</th></tr>
+        <tr><td><span class="agency-dot" style="background:#0d9488"></span><b>Summit Staffing</b></td><td>128</td><td class="best">94.1%</td><td class="best">2.1 days</td><td class="best">19.2%</td><td><span class="pill g">#1 · Expand</span></td></tr>
+        <tr><td><span class="agency-dot" style="background:#1f66f0"></span><b>Balance Staffing</b></td><td>74</td><td>92.8%</td><td>2.4 days</td><td>20.5%</td><td><span class="pill b">#2 · Grow</span></td></tr>
+        <tr><td><span class="agency-dot" style="background:#7c3aed"></span><b>TalentFlow Solutions</b></td><td>98</td><td>90.2%</td><td>2.9 days</td><td>21.8%</td><td><span class="pill b">#3 · Grow</span></td></tr>
+        <tr class="hl"><td><span class="agency-dot" style="background:#d97706"></span><b>IronBridge Workforce</b></td><td>121</td><td class="worst">84.7%</td><td class="worst">3.8 days</td><td class="worst">31.4%</td><td><span class="pill w">#4 · Review</span></td></tr>
+      </table>
+      <div class="legend"><span>Turnover cost avoided YTD: <b style="color:var(--good)">$212K</b></span><span>Program avg fill: <b>91.4%</b></span><span><button class="switch-link" onclick="showPage('exec-suppliers')">Full scorecards →</button></span></div>
+    </div>
+    <div class="card">
+      <h3 style="font-size:14px;margin-bottom:14px">Facilities</h3>
+      <div style="margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;color:var(--heading)"><span>Eastport Plant · Columbus, OH</span><span>214 workers</span></div>
+        <div style="display:flex;gap:14px;font-size:12px;color:var(--muted);margin:5px 0 7px"><span>Fill 93.0%</span><span>Turnover 20.1%</span><span>6 open reqs</span></div>
+        <div class="bar"><i style="width:93%"></i></div>
+      </div>
+      <div style="margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;color:var(--heading)"><span>Southgate Plant · Louisville, KY</span><span>207 workers</span></div>
+        <div style="display:flex;gap:14px;font-size:12px;color:var(--muted);margin:5px 0 7px"><span>Fill 88.1% <span class="pill w" style="padding:1px 7px">watch</span></span><span>Turnover 29.8%</span><span>9 open reqs</span></div>
+        <div class="bar warn"><i style="width:88%"></i></div>
+      </div>
+      <h3 style="font-size:14px;margin:20px 0 8px">Contingent spend — 6 months</h3>
+      <svg viewBox="0 0 340 110" style="width:100%">
+        <defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1f66f0" stop-opacity=".28"/><stop offset="1" stop-color="#1f66f0" stop-opacity="0"/></linearGradient></defs>
+        <polyline points="10,86 76,74 142,58 208,44 274,36 330,30" fill="none" stroke="#1f66f0" stroke-width="2.5" stroke-linecap="round"/>
+        <polygon points="10,86 76,74 142,58 208,44 274,36 330,30 330,100 10,100" fill="url(#sg)"/>
+        <g fill="#1f66f0"><circle cx="10" cy="86" r="3"/><circle cx="76" cy="74" r="3"/><circle cx="142" cy="58" r="3"/><circle cx="208" cy="44" r="3"/><circle cx="274" cy="36" r="3"/><circle cx="330" cy="30" r="3.5" stroke="#fff" stroke-width="1.5"/></g>
+        <g font-size="9" fill="var(--muted)" text-anchor="middle"><text x="10" y="109">Feb</text><text x="76" y="109">Mar</text><text x="142" y="109">Apr</text><text x="208" y="109">May</text><text x="274" y="109">Jun</text><text x="330" y="109">Jul</text></g>
+        <text x="330" y="20" font-size="10" font-weight="700" fill="var(--heading)" text-anchor="end">$1.42M</text>
+      </svg>
+    </div>
+  </div>
+  <div class="section-title"><h2>Your widgets</h2><span class="st-sub">Personalize the command center · VINessa keeps each one current</span></div>
+  <div class="wgrid" id="customWidgets"></div>
+
+  <div class="footer-note">Sample data · Meridian Manufacturing demonstration · Velocity Intelligence Network</div>
+</div>
+
+<!-- ============ EXECUTIVE · SUPPLIERS & SPEND ============ -->
+<div class="page" id="page-exec-suppliers">
+  <div class="greeting"><h1>Suppliers &amp; Spend</h1>
+  <div class="sub">Side-by-side partner performance · 90-day window · both facilities</div></div>
+
+  <div class="card" style="margin-bottom:18px">
+    <h3 style="font-size:14px;margin-bottom:4px">Partner scorecards</h3>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Every metric is computed the same way for every partner — no more three spreadsheets in three formats.</div>
+    <table class="tbl">
+      <tr><th>Partner</th><th>Fill rate</th><th>Time to fill</th><th>90-day turnover</th><th>Compliance</th><th>Avg bill rate</th><th>Rate variance</th><th>Spend (90d)</th></tr>
+      <tr><td><span class="agency-dot" style="background:#0d9488"></span><b>Summit Staffing</b><div style="font-size:11px;color:var(--muted)">128 workers · both facilities</div></td>
+        <td class="best">94.1%</td><td class="best">2.1 d</td><td class="best">19.2%</td><td class="best">98.4%</td><td>$23.10</td><td><span class="pill g">On contract</span></td><td>$1.53M</td></tr>
+      <tr><td><span class="agency-dot" style="background:#1f66f0"></span><b>Balance Staffing</b><div style="font-size:11px;color:var(--muted)">74 workers · Southgate</div></td>
+        <td>92.8%</td><td>2.4 d</td><td>20.5%</td><td>97.8%</td><td>$23.30</td><td><span class="pill g">On contract</span></td><td>$0.86M</td></tr>
+      <tr><td><span class="agency-dot" style="background:#7c3aed"></span><b>TalentFlow Solutions</b><div style="font-size:11px;color:var(--muted)">98 workers · Southgate-weighted</div></td>
+        <td>90.2%</td><td>2.9 d</td><td>21.8%</td><td>97.0%</td><td>$23.85</td><td><span class="pill w">+2.4% OT drift</span></td><td>$1.21M</td></tr>
+      <tr class="hl"><td><span class="agency-dot" style="background:#d97706"></span><b>IronBridge Workforce</b><div style="font-size:11px;color:var(--muted)">121 workers · both facilities</div></td>
+        <td class="worst">84.7%</td><td class="worst">3.8 d</td><td class="worst">31.4%</td><td class="worst">93.1%</td><td>$22.45</td><td><span class="pill g">On contract</span></td><td>$1.38M</td></tr>
+      <tr style="opacity:.8"><td><span class="agency-dot" style="background:var(--line)"></span><b>Apex Labor Group</b> <span class="pill n" id="apexBadge">Not on VIN</span><div style="font-size:11px;color:var(--muted);margin-top:2px">~22 workers · from your invoices · excluded from every metric here</div></td>
+        <td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="pill n">Not visible</span></td><td>~$0.29M<div id="apexAct" style="margin-top:6px"><button class="btn btn-primary" style="padding:6px 10px;font-size:11.5px" onclick="inviteApex()">Invite to VIN</button></div></td></tr>
+    </table>
+    <div class="legend" style="margin-top:10px"><span>🔒 Apex isn’t connected — if they join, they see only their own reqs and workers, never another partner’s data.</span></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3 style="font-size:14px;margin-bottom:4px">What the lowest rate really costs</h3>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">VINessa computes true cost per productive hour — bill rate plus turnover, vacancy, and compliance drag.</div>
+      <table class="tbl">
+        <tr><th>Partner</th><th>Bill rate</th><th>True cost / productive hr</th></tr>
+        <tr><td><b>Summit Staffing</b></td><td>$23.10</td><td class="best">$24.62</td></tr>
+        <tr><td><b>TalentFlow Solutions</b></td><td>$23.85</td><td>$25.71</td></tr>
+        <tr><td><b>IronBridge Workforce</b></td><td class="best">$22.45</td><td class="worst">$27.94</td></tr>
+      </table>
+      <div class="notice">💡 <b>IronBridge is your cheapest rate and your most expensive labor.</b> Turnover and unfilled shifts add $5.49 per productive hour — invisible on any invoice, visible here.</div>
+    </div>
+    <div class="card">
+      <h3 style="font-size:14px;margin-bottom:4px">Recommended allocation — next 90 days</h3>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Where new requisitions should flow, given each partner's demonstrated performance.</div>
+      <div class="alloc">
+        <div class="a-row"><div class="a-name"><span class="agency-dot" style="background:#0d9488"></span>Summit Staffing</div><div class="a-bar"><div class="bar"><i style="width:45%"></i></div></div><div class="a-n">45% <span style="color:var(--good);font-size:11px">▲</span></div></div>
+        <div class="a-row"><div class="a-name"><span class="agency-dot" style="background:#7c3aed"></span>TalentFlow Solutions</div><div class="a-bar"><div class="bar"><i style="width:35%"></i></div></div><div class="a-n">35% <span style="color:var(--good);font-size:11px">▲</span></div></div>
+        <div class="a-row"><div class="a-name"><span class="agency-dot" style="background:#d97706"></span>IronBridge Workforce</div><div class="a-bar warn" style="flex:1"><div class="bar warn"><i style="width:20%"></i></div></div><div class="a-n">20% <span style="color:var(--bad);font-size:11px">▼</span></div></div>
+      </div>
+      <div class="d-rec" style="margin-top:6px"><b>Projected impact:</b> +2.3 pts program fill rate, −4.1 pts turnover, <b>$86K quarterly savings</b>. IronBridge receives an automatic performance-improvement notice with specific targets.</div>
+      <div class="d-actions" style="margin-top:14px"><button class="btn btn-primary" onclick="approve(this,'Allocation policy updated — effective for all new reqs')">Approve allocation</button><button class="btn btn-ghost" onclick="openVin('exec-agencies')">Discuss with VINessa</button></div>
+    </div>
+  </div>
+  <div class="footer-note">Sample data · Meridian Manufacturing demonstration · Velocity Intelligence Network</div>
+</div>
+
+<!-- ============ EXECUTIVE · PROGRAM SPEND (client view) ============ -->
+<div class="page" id="page-exec-program">
+  <div class="greeting"><h1>Program Spend</h1>
+  <div class="sub">Spend vs. plan across your facilities · program composition by partner · July</div></div>
+
+  <div class="card" style="margin-bottom:18px">
+    <h3 style="font-size:14px;margin-bottom:4px">Program composition</h3>
+    <div style="font-size:12px;color:var(--muted)">~443 contingent workers across 5 partners · 421 live on VIN, ~22 estimated from your invoices</div>
+    <div class="pmix">
+      <i style="width:28.9%;background:#0d9488"></i>
+      <i style="width:27.3%;background:#d97706"></i>
+      <i style="width:22.1%;background:#7c3aed"></i>
+      <i style="width:16.7%;background:#1f66f0"></i>
+      <i style="width:5%;background:repeating-linear-gradient(45deg,var(--barbg),var(--barbg) 4px,var(--line) 4px,var(--line) 8px)"></i>
+    </div>
+    <div class="plegend">
+      <span><span class="agency-dot" style="background:#0d9488"></span>Summit Staffing · 128 (live)</span>
+      <span><span class="agency-dot" style="background:#d97706"></span>IronBridge · 121 (live)</span>
+      <span><span class="agency-dot" style="background:#7c3aed"></span>TalentFlow · 98 (live)</span>
+      <span><span class="agency-dot" style="background:#1f66f0"></span>Balance Staffing · 74 (live)</span>
+      <span><span class="agency-dot" style="background:var(--line)"></span>Apex Labor · ~22 (your estimate — <button class="switch-link" onclick="showPage('exec-suppliers')">not on VIN, invite →</button>)</span>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:18px">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:6px">
+      <h3 style="font-size:14px">Spend vs. plan — by facility</h3>
+      <span style="font-size:11.5px;color:var(--muted)">tick = plan · July month-to-date</span>
+    </div>
+    <div class="spendrow">
+      <div class="sn">Eastport Plant<small>Columbus, OH · CC-100</small></div>
+      <div class="barwrap"><div class="bar"><i style="width:94%"></i></div><div class="plan-tick" style="left:93.8%"></div></div>
+      <div class="amt"><b>$842K</b> / $840K plan <span class="pill n" style="margin-left:6px">on plan</span></div>
+    </div>
+    <div class="spendrow">
+      <div class="sn">Southgate Plant<small>Louisville, KY · CC-200</small></div>
+      <div class="barwrap"><div class="bar warn"><i style="width:64.5%"></i></div><div class="plan-tick" style="left:57.8%"></div></div>
+      <div class="amt"><b>$578K</b> / $518K plan <span class="pill w" style="margin-left:6px">+$60K</span></div>
+    </div>
+    <div class="spendrow" style="border-top:1.5px solid var(--line);margin-top:4px;padding-top:14px">
+      <div class="sn" style="font-weight:700">Program total</div>
+      <div class="barwrap"><div class="bar warn"><i style="width:94%"></i></div><div class="plan-tick" style="left:89.9%"></div></div>
+      <div class="amt"><b>$1.42M</b> / $1.36M plan <span class="pill w" style="margin-left:6px">▲ 4.6%</span></div>
+    </div>
+    <div class="notice" style="margin-top:14px">✦ <b>Why you're over plan:</b> nearly all of the variance is Southgate overtime backfilling unfilled 2nd-shift seats. Filling Monday's ramp properly removes it structurally — the redistribution plan in your decision queue does exactly that.</div>
+    <div class="d-actions" style="margin-top:12px"><button class="btn btn-nav" onclick="openVin('exec-spend')">✦ Ask VINessa where to reduce spend</button></div>
+  </div>
+  <div class="footer-note">Sample data · Meridian Manufacturing demonstration · Velocity Intelligence Network</div>
+</div>
+
+<!-- ============ OPS · TODAY ============ -->
+<div class="page" id="page-ops-today">
+  <div class="greeting"><h1>Good morning, Marcus</h1>
+  <div class="sub">Tuesday, July 14 · Eastport Plant · 214 contingent workers on-site today</div></div>
+
+  <div class="brief">
+    <div class="b-head"><span style="font-size:17px">✦</span> VINessa's Shift Brief <span class="vin-chip" style="background:rgba(255,255,255,.15);color:#bfe1ff">Updated 5:45 AM</span></div>
+    <ul>
+      <li><span class="dot">●</span><span><b style="color:#fff">Today is covered.</b> All three shifts at or above 95% — 2nd shift has 4 open seats but line supervisors confirmed coverage from cross-trained staff.</span></li>
+      <li><span class="dot">●</span><span><b style="color:#fff">Monday is not.</b> The week-3 ramp needs 28 more workers across both plants. Your redistribution plan is drafted and waiting in Requisitions.</span></li>
+      <li><span class="dot">●</span><span><b style="color:#fff">9 items need your decision today</b> — 6 candidates, 2 invoice exceptions, and 1 req approval. Estimated time: 12 minutes. I've pre-reviewed all of them.</span></li>
+    </ul>
+    <div class="b-act"><button class="btn btn-nav" onclick="openVin('ops-monday')">Ask about Monday →</button></div>
+  </div>
+
+  <div class="section-title"><h2>Today's coverage — Eastport</h2><span class="st-sub">Live · refreshed from supplier confirmations</span></div>
+  <div class="card" style="margin-bottom:18px">
+    <div class="shift-grid">
+      <div class="shift"><div class="s-name"><span>1st Shift · 6a–2p</span><span class="pill g">Healthy</span></div><div class="s-fill">148<small> / 152</small></div><div class="bar"><i style="width:97%"></i></div></div>
+      <div class="shift"><div class="s-name"><span>2nd Shift · 2p–10p</span><span class="pill w">4 open</span></div><div class="s-fill">62<small> / 66</small></div><div class="bar warn"><i style="width:94%"></i></div></div>
+      <div class="shift"><div class="s-name"><span>3rd Shift · 10p–6a</span><span class="pill g">Healthy</span></div><div class="s-fill">38<small> / 40</small></div><div class="bar"><i style="width:95%"></i></div></div>
+    </div>
+    <div class="legend" style="margin-top:14px"><span>No-show rate today: <b style="color:var(--good)">2.1%</b> (30-day avg 3.4%)</span><span>Backfills confirmed by suppliers: <b>6 of 6</b></span><span>Next risk window: <b style="color:var(--warn)">Monday, 2nd shift</b></span></div>
+  </div>
+
+  <div class="section-title"><h2>Your decision queue</h2><span class="st-sub">Pre-reviewed by VINessa · highest impact first</span></div>
+  <div class="decisions">
+    <div class="decision">
+      <div class="d-tag blue">👤 Candidates · 6 awaiting review</div>
+      <h3>6 candidates for CNC Machine Operators (REQ-1187)</h3>
+      <p>Submitted by Summit (4) and TalentFlow (2). VINessa screened all six against your requirements: certifications, shift availability, and prior tenure at similar lines.</p>
+      <div class="d-rec"><b>VINessa recommends:</b> Fast-track the 4 with active OSHA-10 and 12+ month prior tenure. Two need certification verification first — already requested from suppliers.</div>
+      <div class="d-actions"><button class="btn btn-primary" onclick="approve(this,'4 candidates fast-tracked · suppliers notified for onboarding')">Fast-track 4</button><button class="btn btn-ghost" onclick="openVin('ops-cands')">Review each</button></div>
+    </div>
+    <div class="decision watch">
+      <div class="d-tag">▲ Timesheets · 8 flagged of 214</div>
+      <h3>206 timesheets auto-approved · 8 need your eyes</h3>
+      <p>VINessa auto-approved every timesheet that matched schedule, badge scans, and supervisor confirmation. The 8 exceptions have OT above threshold or badge mismatches.</p>
+      <div class="d-rec"><b>Why this matters:</b> Last month, exception review caught $4,900 in over-billed hours before they reached an invoice.</div>
+      <div class="d-actions"><button class="btn btn-primary" onclick="approve(this,'8 exceptions resolved · 3 corrected, 5 approved')">Review 8 exceptions</button></div>
+    </div>
+    <div class="decision risk">
+      <div class="d-tag">⚠ Turnover Watch · Southgate influence</div>
+      <h3>Weld Dept, 2nd shift: 5 quits in 14 days</h3>
+      <p>All five were IronBridge placements with under 30 days tenure. Exit patterns cluster around the same line and supervisor rotation.</p>
+      <div class="d-rec"><b>VINessa's analysis:</b> Local market wage for welders rose $1.10/hr in 60 days; your rate card hasn't moved. Recommend a targeted $1.00 adjustment for this role — payback in 22 days vs. continued churn.</div>
+      <div class="d-actions"><button class="btn btn-primary" onclick="approve(this,'Rate adjustment routed to Dana for approval')">Propose rate adjustment</button><button class="btn btn-ghost" onclick="openVin('ops-turnover')">See the analysis</button></div>
+    </div>
+  </div>
+  <div class="footer-note">Sample data · Meridian Manufacturing demonstration · Velocity Intelligence Network</div>
+</div>
+
+<!-- ============ OPS · REQUISITIONS ============ -->
+<div class="page" id="page-ops-reqs">
+  <div class="greeting" style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap"><div><h1>Requisitions</h1>
+  <div class="sub">15 open · 28 positions needed for Monday's ramp · smart distribution enabled</div></div>
+  <button class="btn btn-primary" onclick="openNewReq()" style="margin-bottom:20px">＋ Open a requisition</button></div>
+
+  <div class="decision save" style="margin-bottom:20px;border-left-width:4px">
+    <div class="d-tag">✦ VINessa Draft · Ready for approval</div>
+    <h3>Monday ramp: 28 positions, distributed by demonstrated performance</h3>
+    <p>Instead of emailing three agencies and hoping, VINessa drafted the reqs and split them based on each partner's actual 48-hour fill history for these exact roles and shifts.</p>
+    <div class="d-actions"><button class="btn btn-primary" onclick="openModal()">Open distribution plan</button></div>
+  </div>
+
+  <div class="card">
+    <h3 style="font-size:14px;margin-bottom:12px">Open requisitions</h3>
+    <table class="tbl">
+      <tr><th>Req</th><th>Role · Facility</th><th>Positions</th><th>Distributed to</th><th>Fill progress</th><th>Need by</th><th>Status</th></tr>
+      <tr><td><b>REQ-1191</b></td><td>Assembler II · Southgate · 2nd</td><td>14</td><td>Summit</td><td><div class="bar"><i style="width:64%"></i></div></td><td>Mon, Jul 20</td><td><span class="pill b">9 confirmed</span></td></tr>
+      <tr><td><b>REQ-1192</b></td><td>Assembler II · Southgate · 2nd</td><td>9</td><td>TalentFlow</td><td><div class="bar"><i style="width:56%"></i></div></td><td>Mon, Jul 20</td><td><span class="pill b">5 confirmed</span></td></tr>
+      <tr class="hl"><td><b>REQ-1193</b></td><td>Assembler II · Southgate · 2nd</td><td>5</td><td>IronBridge</td><td><div class="bar warn"><i style="width:20%"></i></div></td><td>Mon, Jul 20</td><td><span class="pill w">1 confirmed · nudged</span></td></tr>
+      <tr><td><b>REQ-1187</b></td><td>CNC Operator · Eastport · 1st</td><td>6</td><td>Summit + TalentFlow</td><td><div class="bar"><i style="width:100%"></i></div></td><td>Wed, Jul 22</td><td><span class="pill g">6 in review</span></td></tr>
+      <tr><td><b>REQ-1185</b></td><td>Forklift Operator · Eastport · 3rd</td><td>4</td><td>Summit</td><td><div class="bar"><i style="width:75%"></i></div></td><td>Fri, Jul 24</td><td><span class="pill b">3 confirmed</span></td></tr>
+      <tr><td><b>REQ-1182</b></td><td>Quality Inspector · Southgate · 1st</td><td>3</td><td>TalentFlow</td><td><div class="bar"><i style="width:100%"></i></div></td><td>Filled</td><td><span class="pill g">Complete</span></td></tr>
+      <tr><td><b>REQ-1188</b></td><td>Material Handler · Southgate · 1st</td><td>3</td><td>Balance</td><td><div class="bar"><i style="width:100%"></i></div></td><td>Filled</td><td><span class="pill g">Complete</span></td></tr>
+    </table>
+    <div class="notice" style="margin-top:14px">✦ <b>One req, one click, three agencies.</b> Velocity distributes every requisition automatically under your rules — no more forwarding emails, no more "did you get my req?" calls. Suppliers confirm inside the platform and you watch fills land in real time.</div>
+  </div>
+
+  <div class="section-title"><h2>Submitted by you</h2><span class="st-sub">Client-submitted reqs route straight into partner pipelines — no emails</span></div>
+  <div class="card">
+    <table class="tbl"><thead><tr><th>Req</th><th>Role · Facility</th><th>Positions</th><th>Distribution</th><th>Submitted</th><th>Status</th></tr></thead>
+    <tbody id="submittedReqs"></tbody></table>
+  </div>
+
+  <div class="footer-note">Sample data · Meridian Manufacturing demonstration · Velocity Intelligence Network</div>
+</div>
+
+<!-- ============ OPS · ROSTER (client view) ============ -->
+<div class="page" id="page-ops-roster">
+  <div class="greeting"><h1>Roster</h1>
+  <div class="sub">Every contingent worker on billing, across all partners — one live roster, zero spreadsheets</div></div>
+
+  <div class="card" style="margin-bottom:18px">
+    <h3 style="font-size:14px;margin-bottom:4px">Assignments ending soon</h3>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:10px">VINessa flags end dates before they become coverage gaps.</div>
+    <div class="spendrow" style="align-items:center">
+      <div class="sn" style="width:auto;flex:1"><span class="agency-dot" style="background:#0d9488"></span>C. Romero — Assembler II · Southgate 2nd<small>via Summit · ends Fri, Jul 24</small></div>
+      <span class="pill g">Backfill open · on pace</span>
+    </div>
+    <div class="spendrow" style="align-items:center">
+      <div class="sn" style="width:auto;flex:1"><span class="agency-dot" style="background:#7c3aed"></span>K. Brandt — Assembler II · Eastport 3rd<small>via TalentFlow · ends Fri, Jul 31</small></div>
+      <span class="pill r">No backfill requested</span>
+      <button class="btn btn-primary" onclick="openNewReq('backfill')">Open backfill req</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="filterbar">
+      <select id="rPartner" onchange="renderOpsRoster()"><option value="all">All partners</option><option>Summit</option><option>Balance</option><option>TalentFlow</option><option>IronBridge</option></select>
+      <select id="rFac" onchange="renderOpsRoster()"><option value="all">Both facilities</option><option>Eastport</option><option>Southgate</option></select>
+      <select id="rShift" onchange="renderOpsRoster()"><option value="all">All shifts</option><option>1st</option><option>2nd</option><option>3rd</option></select>
+      <span class="seg" id="rSeg">
+        <button class="on" data-f="all" onclick="setRosterSeg('all',this)">All</button>
+        <button data-f="active" onclick="setRosterSeg('active',this)">Active</button>
+        <button data-f="attention" onclick="setRosterSeg('attention',this)">Needs attention</button>
+        <button data-f="ending" onclick="setRosterSeg('ending',this)">Ending soon</button>
+      </span>
+      <span class="count" id="rCount"></span>
+    </div>
+    <table class="tbl"><thead><tr><th>Worker</th><th>Partner</th><th>Role</th><th>Facility · Shift</th><th>Assignment ends</th><th>Status</th></tr></thead>
+    <tbody id="opsRosterRows"></tbody></table>
+    <div class="notice" style="margin-top:14px">🔒 Meridian Manufacturing data only · each partner sees just their own slice · click a highlighted worker for their full record</div>
+  </div>
+  <div class="footer-note">Sample data · Meridian Manufacturing demonstration · Velocity Intelligence Network</div>
+</div>
+
+<!-- ============ OPS · COMPLIANCE ============ -->
+<div class="page" id="page-ops-compliance">
+  <div class="greeting"><h1>Compliance</h1>
+  <div class="sub">96.2% program compliance · VINessa tracks every document, every worker, every day</div></div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="k-label">Workers Fully Compliant</div><div class="k-val">334 / 347</div><span class="k-delta up">96.2%</span></div>
+    <div class="kpi"><div class="k-label">Expiring ≤ 10 days</div><div class="k-val">14</div><span class="k-delta flat">All forklift certs</span></div>
+    <div class="kpi"><div class="k-label">Missing Documents</div><div class="k-val">3</div><span class="k-delta down">Blocked from schedule</span></div>
+    <div class="kpi"><div class="k-label">Audit Readiness</div><div class="k-val">100%</div><span class="k-delta up">Full document trail</span></div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h3 style="font-size:14px">Expiring certifications — next 10 days</h3>
+      <button class="btn btn-primary" onclick="approve(this,'14 renewals initiated · scheduled around posted shifts')">Initiate all 14 renewals</button>
+    </div>
+    <table class="tbl">
+      <tr><th>Worker</th><th>Agency</th><th>Certification</th><th>Expires</th><th>Assignment impact</th><th>VINessa action</th></tr>
+      <tr><td><b>J. Alvarez</b></td><td>Summit</td><td>Forklift (PIT)</td><td><span class="pill r">Jul 18</span></td><td>Receiving Line 1</td><td>Renewal slot held · Thu 1p</td></tr>
+      <tr><td><b>T. Okafor</b></td><td>Summit</td><td>Forklift (PIT)</td><td><span class="pill r">Jul 19</span></td><td>Receiving Line 1</td><td>Renewal slot held · Thu 3p</td></tr>
+      <tr><td><b>M. Castillo</b></td><td>IronBridge</td><td>Forklift (PIT)</td><td><span class="pill w">Jul 21</span></td><td>Receiving Line 2</td><td>Renewal slot held · Fri 9a</td></tr>
+      <tr><td><b>D. Nguyen</b></td><td>TalentFlow</td><td>Forklift (PIT)</td><td><span class="pill w">Jul 22</span></td><td>Shipping Dock</td><td>Renewal slot held · Fri 11a</td></tr>
+      <tr><td colspan="6" style="color:var(--muted);font-size:12px">+ 10 more · all scheduled · <button class="switch-link" onclick="openVin('exec-compliance')">ask VINessa for the full plan</button></td></tr>
+    </table>
+    <div class="notice">✦ <b>Before Velocity:</b> certification tracking lived in a spreadsheet updated monthly — lapses were discovered when a supervisor pulled a worker off a truck. <b>Now:</b> VINessa watches every expiration daily, schedules renewals around shifts, and blocks non-compliant workers from schedules automatically.</div>
+  </div>
+  <div class="footer-note">Sample data · Meridian Manufacturing demonstration · Velocity Intelligence Network</div>
+</div>
+
+<!-- ============ OPS · INVOICES ============ -->
+<div class="page" id="page-ops-invoices">
+  <div class="greeting"><h1>Invoices</h1>
+  <div class="sub">VINessa reconciles every invoice line against approved time before you ever see it</div></div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="k-label">Pending Approval</div><div class="k-val">$318K</div><span class="k-delta up">7 invoices</span></div>
+    <div class="kpi"><div class="k-label">Auto-Reconciled Clean</div><div class="k-val">5 of 7</div><span class="k-delta up">Ready for one-click release</span></div>
+    <div class="kpi"><div class="k-label">Exceptions Flagged</div><div class="k-val">2</div><span class="k-delta flat">$3,204 in question</span></div>
+    <div class="kpi"><div class="k-label">Recovered YTD</div><div class="k-val">$38.7K</div><span class="k-delta up">Billing errors caught</span></div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h3 style="font-size:14px">Invoice queue</h3>
+      <button class="btn btn-primary" onclick="approve(this,'5 clean invoices released · $263,090 scheduled for payment')">Release 5 clean invoices</button>
+    </div>
+    <table class="tbl">
+      <tr><th>Invoice</th><th>Agency</th><th>Period</th><th>Amount</th><th>VINessa reconciliation</th><th>Action</th></tr>
+      <tr><td><b>INV-2209</b></td><td>Summit</td><td>Jul 1–7</td><td>$96,410</td><td><span class="pill g">✓ Matches approved time</span></td><td><button class="btn btn-ghost" onclick="approve(this,'INV-2209 released for payment')">Release</button></td></tr>
+      <tr><td><b>INV-2210</b></td><td>Summit</td><td>Jul 1–7 · Southgate</td><td>$41,220</td><td><span class="pill g">✓ Matches approved time</span></td><td><button class="btn btn-ghost" onclick="approve(this,'INV-2210 released for payment')">Release</button></td></tr>
+      <tr><td><b>INV-2212</b></td><td>IronBridge</td><td>Jul 1–7</td><td>$88,340</td><td><span class="pill g">✓ Matches approved time</span></td><td><button class="btn btn-ghost" onclick="approve(this,'INV-2212 released for payment')">Release</button></td></tr>
+      <tr class="hl"><td><b>INV-2214</b></td><td>TalentFlow</td><td>Jul 1–7</td><td>$44,000</td><td><span class="pill r">▲ 37 OT hrs above approved time · $2,178</span></td><td><button class="btn btn-primary" onclick="approve(this,'Dispute filed with reconciliation · $41,822 released')">Hold &amp; dispute</button></td></tr>
+      <tr class="hl"><td><b>INV-2215</b></td><td>IronBridge</td><td>Jul 1–7 · Southgate</td><td>$31,890</td><td><span class="pill w">▲ Rate variance on 2 workers · $1,026</span></td><td><button class="btn btn-primary" onclick="approve(this,'Rate variance disputed · corrected invoice requested')">Hold &amp; dispute</button></td></tr>
+    </table>
+    <div class="notice">✦ <b>The math is done before you arrive.</b> Every line is matched to approved timesheets, contracted rates, and badge data. Clean invoices release in one click; only genuine exceptions consume your attention. Average approval cycle has fallen from 19 days to 6.4.</div>
+  </div>
+  <div class="footer-note">Sample data · Meridian Manufacturing demonstration · Velocity Intelligence Network</div>
+</div>
+<!-- ============ SUPPLIER · OVERVIEW ============ -->
+<div class="page" id="page-sup-home">
+  <div class="tenant-banner"><span class="lock">🔒</span><span><b>Summit Staffing Group workspace.</b> You see only your organization's requisitions, workers, and performance. Competitor data is never visible — Velocity's multi-tenant architecture isolates every supplier completely.</span></div>
+
+  <div class="greeting"><h1>Good morning, Priya</h1>
+  <div class="sub">Summit Staffing Group · Meridian Manufacturing program · 128 active workers</div></div>
+
+  <div class="brief">
+    <div class="b-head"><span style="font-size:17px">✦</span> VINessa's Partner Brief <span class="vin-chip" style="background:rgba(255,255,255,.15);color:#bfe1ff">Updated 6:00 AM</span></div>
+    <ul>
+      <li><span class="dot">●</span><span><b style="color:#fff">You just received 14 new positions</b> (REQ-1191, Assembler II, Southgate 2nd shift) — the largest allocation of Monday's ramp. You earned it: your 48-hour fill rate for this role is the best in the program.</span></li>
+      <li><span class="dot">●</span><span><b style="color:#fff">9 confirmed, 5 to go by Friday.</b> Your Louisville bench shows 11 available candidates matching the profile. I've shortlisted them for your recruiters.</span></li>
+      <li><span class="dot">●</span><span><b style="color:#fff">You're ranked #1 of 4 partners</b> this quarter. Keep time-to-fill under 2.5 days and your allocation share grows again next cycle.</span></li>
+    </ul>
+    <div class="b-act"><button class="btn btn-nav" onclick="openVin('sup-priority')">What should I prioritize? →</button></div>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="k-label">Active Workers</div><div class="k-val">128</div><span class="k-delta up">▲ 12 this month</span></div>
+    <div class="kpi"><div class="k-label">Open Positions Assigned</div><div class="k-val">18</div><span class="k-delta flat">5 due Friday</span></div>
+    <div class="kpi"><div class="k-label">Your Fill Rate</div><div class="k-val">94.1%</div><span class="k-delta up">Program rank #1 of 4</span></div>
+    <div class="kpi"><div class="k-label">Submissions in Review</div><div class="k-val">9</div><span class="k-delta up">4 fast-tracked today</span></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3 style="font-size:14px;margin-bottom:4px">Your scorecard vs. program average</h3>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Other suppliers are anonymized. You see your standing — never their data.</div>
+      <table class="tbl">
+        <tr><th>Metric</th><th>You</th><th>Program avg</th><th>Standing</th></tr>
+        <tr><td>Fill rate</td><td class="best">94.1%</td><td>89.7%</td><td><span class="pill g">#1 of 4</span></td></tr>
+        <tr><td>Time to fill</td><td class="best">2.1 days</td><td>2.9 days</td><td><span class="pill g">#1 of 4</span></td></tr>
+        <tr><td>90-day retention</td><td class="best">80.8%</td><td>75.9%</td><td><span class="pill g">#1 of 4</span></td></tr>
+        <tr><td>Compliance readiness</td><td class="best">98.4%</td><td>96.2%</td><td><span class="pill g">#1 of 4</span></td></tr>
+        <tr><td>Submittal-to-hire ratio</td><td>2.4 : 1</td><td class="best">2.2 : 1</td><td><span class="pill w">#2 of 4</span></td></tr>
+      </table>
+      <div class="notice">💡 <b>Performance is rewarded automatically.</b> Meridian's allocation rules route more positions to partners who deliver. Your share grew from 38% to 45% this quarter.</div>
+    </div>
+    <div class="card">
+      <h3 style="font-size:14px;margin-bottom:12px">Action needed</h3>
+      <div class="decision" style="box-shadow:none;border-left-color:var(--blue);margin-bottom:12px">
+        <div class="d-tag blue">REQ-1191 · Due Fri</div>
+        <h3>5 Assembler II seats still open — Southgate, 2nd shift</h3>
+        <div class="d-rec"><b>VINessa shortlisted 11 bench candidates</b> with matching shift availability and assembly experience, ranked by predicted 90-day retention.</div>
+        <div class="d-actions"><button class="btn btn-primary" onclick="approve(this,'11-candidate shortlist sent to your recruiting team')">Send shortlist to recruiters</button></div>
+      </div>
+      <div class="decision" style="box-shadow:none;border-left-color:var(--warn)">
+        <div class="d-tag">▲ Certification gap</div>
+        <h3>2 submissions blocked — OSHA-10 verification missing</h3>
+        <div class="d-rec">Upload the certificates and both candidates move to Meridian's review queue automatically. No emails required.</div>
+        <div class="d-actions"><button class="btn btn-primary" onclick="approve(this,'Documents uploaded · candidates released to client review')">Upload documents</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title"><h2>Your open requisitions</h2><span class="st-sub">Only Summit's assignments are visible</span></div>
+  <div class="card">
+    <table class="tbl">
+      <tr><th>Req</th><th>Role · Facility</th><th>Your positions</th><th>Filled</th><th>Need by</th><th>Payment status</th></tr>
+      <tr><td><b>REQ-1191</b></td><td>Assembler II · Southgate · 2nd</td><td>14</td><td><div class="bar"><i style="width:64%"></i></div></td><td>Mon, Jul 20</td><td><span class="pill n">—</span></td></tr>
+      <tr><td><b>REQ-1187</b></td><td>CNC Operator · Eastport · 1st</td><td>4</td><td><div class="bar"><i style="width:100%"></i></div></td><td>In review</td><td><span class="pill n">—</span></td></tr>
+      <tr><td><b>REQ-1185</b></td><td>Forklift Operator · Eastport · 3rd</td><td>4</td><td><div class="bar"><i style="width:75%"></i></div></td><td>Fri, Jul 24</td><td><span class="pill n">—</span></td></tr>
+      <tr><td><b>INV-2209</b></td><td>Weekly invoice · Jul 1–7 · Eastport</td><td colspan="2">$96,410 · reconciled clean by VINessa</td><td>—</td><td><span class="pill g">Approved · pays Jul 17</span></td></tr>
+      <tr><td><b>INV-2210</b></td><td>Weekly invoice · Jul 1–7 · Southgate</td><td colspan="2">$41,220 · reconciled clean by VINessa</td><td>—</td><td><span class="pill g">Approved · pays Jul 17</span></td></tr>
+    </table>
+    <div class="notice">✦ <b>No more chasing.</b> Reqs arrive here the moment Meridian releases them. Invoices show reconciliation status and exact pay dates. Your recruiters spend their time recruiting — not emailing for status.</div>
+  </div>
+  <div class="footer-note">Sample data · Summit Staffing Group view · Velocity Intelligence Network</div>
+</div>
+<!--SUPPAGES-END-->
+    </div>
+  </div>
+</div>
+
+<!-- VINessa panel -->
+<div id="vin-overlay" onclick="closeVin()"></div>
+<div id="vinessa">
+  <div class="vin-head">
+    <div class="v-orb">V</div>
+    <div><div class="v-name">VINessa</div><div class="v-sub">Your Digital Operations Chief of Staff</div></div>
+    <button class="v-close" onclick="closeVin()">✕</button>
+  </div>
+  <div class="vin-body" id="vin-body"></div>
+  <div class="vin-sugs" id="vin-sugs"></div>
+  <div class="vin-input">
+    <input id="vin-text" placeholder="Ask anything about your operation…" onkeydown="if(event.key==='Enter')sendVin()">
+    <button onclick="sendVin()">➤</button>
+  </div>
+</div>
+
+<div id="toast"><span class="tick">✓</span><span id="toast-msg"></span></div>
+<div id="modal-wrap" onclick="if(event.target===this)closeModal()"><div class="modal" id="modal"></div></div>
+
+<script>
+/* ================= LOGO ================= */
+function logoIcon(px){
+  const dots=[];const cx=104,cy=112,R=86;
+  const angs=[78,102,126,150,174,198,222,246,270,294,318,342];
+  angs.forEach((a,i)=>{
+    const rad=a*Math.PI/180;
+    const x=cx+R*Math.cos(rad), y=cy-R*Math.sin(rad);
+    const t=Math.abs(180-a)/110;               // 0 at left, 1 near gap
+    const r=13-7.5*Math.min(t,1);              // bigger on left
+    const c=t<0.35?'#1746d8':t<0.7?'#1f66f0':'#38b0ff';
+    dots.push(`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}" fill="${c}"/>`);
+  });
+  return `<svg width="${px}" height="${px}" viewBox="0 0 230 224" xmlns="http://www.w3.org/2000/svg">
+    ${dots.join('')}
+    <path d="M56 118 L96 156 L196 22" fill="none" stroke="var(--logo-check)" stroke-width="21" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`;
+}
+document.getElementById('logo-big').innerHTML=
+ `<div style="display:flex;align-items:center;gap:20px">${logoIcon(96)}
+   <div><div style="font-size:52px;font-weight:700;color:var(--heading);letter-spacing:-1px;line-height:1">Velocity</div>
+   <div style="font-size:16px;color:var(--muted);letter-spacing:3.5px;margin-top:6px;font-weight:500">INTELLIGENCE NETWORK</div></div></div>`;
+document.getElementById('logo-mark').innerHTML=logoIcon(34);
+
+/* ================= PERSONAS ================= */
+const P={
+ exec:{name:'Dana Whitfield',role:'VP, Workforce Operations',init:'DW',color:'linear-gradient(135deg,#16294e,#3b5ea8)',
+   scope:'🏢 Meridian Manufacturing · Enterprise',home:'exec-home',
+   nav:[['exec-home','◈','Command Center'],['exec-program','▦','Program Spend'],['exec-suppliers','⬡','Suppliers & Spend']],
+   foot:'Persona: Executive<br>Capabilities: Approve · View Spend · Reports<br>Scope: Enterprise',
+   sugs:[['exec-monday','Will Monday\'s shifts be staffed?'],['exec-turnover','Why is turnover up at Southgate?'],['exec-agencies','Compare my three agencies'],['exec-spend','Where can we reduce spend?']],
+   greet:`Good morning, Dana. Three things need your judgment today — Monday's Southgate ramp, the IronBridge allocation question, and one invoice exception. Everything else, I've handled or queued. What would you like to dig into?`},
+ ops:{name:'Marcus Reed',role:'Operations Manager · Eastport',init:'MR',color:'linear-gradient(135deg,#1f66f0,#38b0ff)',
+   scope:'🏭 Eastport Plant · Columbus, OH',home:'ops-today',
+   nav:[['ops-today','◈','Today'],['ops-reqs','▤','Requisitions'],['ops-roster','▥','Roster'],['ops-compliance','✓','Compliance'],['ops-invoices','$','Invoices']],
+   foot:'Persona: Operational Manager<br>Capabilities: Create Reqs · Approve Time · Approve Invoices<br>Scope: Eastport + Southgate reqs',
+   sugs:[['ops-monday','Will Monday be covered?'],['ops-draft','Draft a req for 20 assemblers'],['ops-turnover','What\'s driving the weld dept quits?'],['ops-invoice','Which invoices need my review?']],
+   greet:`Morning, Marcus. Today's shifts are covered — Monday is the one to watch. Your queue is 9 items, about 12 minutes; I've pre-reviewed all of them. Want to start with Monday or knock out the queue?`},
+ sup:{name:'Priya Sharma',role:'Account Director · Summit Staffing',init:'PS',color:'linear-gradient(135deg,#0d9488,#34d399)',
+   scope:'🤝 Summit Staffing Group · Partner Workspace',home:'sup-home',
+   nav:[['sup-home','◈','My Program']],
+   foot:'Persona: Supplier Manager<br>Capabilities: Submit Candidates · View Own Performance<br>Scope: Summit Staffing data only',
+   sugs:[['sup-priority','Which reqs should I prioritize?'],['sup-trend','How is my performance trending?'],['sup-pay','When do my invoices pay?']],
+   greet:`Good morning, Priya. Big day — Meridian just allocated you 14 of the 28 Monday-ramp positions, your largest single allocation in this program. You have 5 seats to fill by Friday and I've already shortlisted bench candidates. Where shall we start?`}
+};
+let cur='exec';
+
+function enterApp(p){
+  cur=p;const c=P[p];
+  document.getElementById('login').style.display='none';
+  document.getElementById('app').classList.add('active');
+  document.getElementById('scope').innerHTML=c.scope+' <span class="sc-caret">▾</span>';
+  document.getElementById('userchip').innerHTML=
+    `<div class="avatar" style="background:${c.color};cursor:pointer" title="Switch persona" onclick="backToLogin()">${c.init}</div>
+     <div><div class="uname">${c.name}</div><div class="urole">${c.role} · <button class="switch-link" onclick="backToLogin()">switch persona</button></div></div>`;
+  document.getElementById('nav').innerHTML=
+    `<div class="nav-label">Workspace</div>`+
+    c.nav.map(([id,ico,label],i)=>`<a href="#" class="${i===0?'active':''}" data-page="${id}" onclick="showPage('${id}');return false"><span class="ico">${ico}</span>${label}</a>`).join('')+
+    `<div class="nav-label" style="margin-top:14px">Platform</div>
+     <a href="#" onclick="openVin();return false"><span class="ico">✦</span>VINessa</a>
+     <a href="#" onclick="toast('Reports are generated conversationally — just ask VINessa');return false"><span class="ico">▦</span>Reports</a>`;
+  document.getElementById('side-foot').innerHTML=c.foot;
+  showPage(c.home);
+  setTimeout(()=>toast('Tip: click any KPI, table row, shift, or facility to drill into the data behind it'),700);
+  document.getElementById('vin-body').innerHTML='';vinStarted=false;
+  document.getElementById('vin-sugs').innerHTML=c.sugs.map(([id,q])=>`<button class="sug" onclick="playVin('${id}')">${q}</button>`).join('');
+}
+function backToLogin(){
+  document.getElementById('app').classList.remove('active');
+  document.getElementById('login').style.display='flex';
+  closeVin();
+}
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.nav a[data-page]').forEach(a=>a.classList.toggle('active',a.dataset.page===id));
+  document.getElementById('content').scrollTop=0;
+}
+
+/* ================= TOAST / APPROVE ================= */
+let toastTimer;
+function toast(msg){
+  document.getElementById('toast-msg').textContent=msg;
+  const t=document.getElementById('toast');t.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),3400);
+}
+function approve(btn,msg){
+  if(window.event)window.event.stopPropagation();
+  btn.classList.remove('btn-primary','btn-ghost');btn.classList.add('btn','btn-approved');
+  btn.innerHTML='✓ Done';btn.onclick=null;toast(msg);
+}
+
+/* ================= MODAL (smart distribution) ================= */
+function openModal(){
+  document.getElementById('modal').innerHTML=`
+   <h3>✦ Smart Distribution — Monday Ramp (28 positions)</h3>
+   <div class="m-sub">Assembler II · Southgate Plant · 2nd shift · start Mon, Jul 20</div>
+   <div class="notice">VINessa allocated these positions using each partner's <b>actual 48-hour fill performance</b> for 2nd-shift assembly roles over the past 60 days — not contract defaults, not gut feel.</div>
+   <div class="alloc">
+     <div class="a-row"><div class="a-name"><span class="agency-dot" style="background:#0d9488"></span>Summit Staffing</div><div class="a-bar"><div class="bar"><i style="width:50%"></i></div></div><div class="a-n">14 seats</div></div>
+     <div class="a-row"><div class="a-name"><span class="agency-dot" style="background:#7c3aed"></span>TalentFlow Solutions</div><div class="a-bar"><div class="bar"><i style="width:32%"></i></div></div><div class="a-n">9 seats</div></div>
+     <div class="a-row"><div class="a-name"><span class="agency-dot" style="background:#d97706"></span>IronBridge Workforce</div><div class="a-bar"><div class="bar warn"><i style="width:18%"></i></div></div><div class="a-n">5 seats</div></div>
+   </div>
+   <table class="tbl" style="margin:6px 0 14px">
+     <tr><th>Partner</th><th>48-hr fill (this role)</th><th>90-day retention</th><th>Confidence</th></tr>
+     <tr><td>Summit</td><td class="best">91%</td><td class="best">80.8%</td><td>High</td></tr>
+     <tr><td>TalentFlow</td><td>78%</td><td>78.2%</td><td>High</td></tr>
+     <tr><td>IronBridge</td><td class="worst">43%</td><td class="worst">68.6%</td><td>Monitored</td></tr>
+   </table>
+   <div class="d-rec"><b>Projected outcome:</b> 26–28 of 28 seats confirmed by Friday EOD (87% confidence). Suppliers are notified the instant you approve; confirmations flow back live.</div>
+   <div class="d-actions" style="margin-top:16px">
+     <button class="btn btn-primary" onclick="approve(this,'28 positions distributed · Summit, TalentFlow & IronBridge notified');setTimeout(closeModal,900)">Approve &amp; distribute</button>
+     <button class="btn btn-ghost" onclick="closeModal()">Adjust manually</button>
+   </div>`;
+  document.getElementById('modal-wrap').classList.add('open');
+  wireDrills(document.getElementById('modal'));
+}
+function closeModal(){document.getElementById('modal-wrap').classList.remove('open');document.getElementById('modal').classList.remove('wide')}
+
+/* ================= DRILL-DOWN ENGINE ================= */
+const dkr=a=>`<div class="dk">${a.map(([l,v])=>`<div class="k"><div class="l">${l}</div><div class="v">${v}</div></div>`).join('')}</div>`;
+const dtbl=(h,rows,foot)=>`<table class="tbl"><tr>${h.map(x=>`<th>${x}</th>`).join('')}</tr>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}${foot?`<tr><td colspan="${h.length}" style="color:var(--muted);font-size:12px">${foot}</td></tr>`:''}</table>`;
+const funnel=st=>`<div class="funnel">${st.map(([l,v,dim])=>`<div class="fstage${dim?' dim':''}"><div class="fv">${v}</div><div class="fl">${l}</div></div>`).join('')}</div>`;
+const tline=items=>`<div class="tline">${items.map(([t,x])=>`<div class="tl"><span class="tt">${t}</span> — ${x}</div>`).join('')}</div>`;
+const vbtn=(id,label)=>`<button class="btn btn-nav" style="margin-top:16px" onclick="closeModal();openVin('${id}')">${label||'✦ Ask VINessa about this'}</button>`;
+function colChart(vals,labels,fmt){
+  const W=560,H=130,max=Math.max(...vals)*1.12,n=vals.length,bw=(W-20)/n*0.56;
+  let s='';vals.forEach((v,i)=>{const x=10+(W-20)/n*i+((W-20)/n-bw)/2,h=(v/max)*(H-38),y=H-24-h;
+    s+=`<rect x="${x}" y="${y}" width="${bw}" height="${h}" rx="4" fill="${i===n-1?'#1f66f0':'var(--barfill2)'}"/>
+        <text x="${x+bw/2}" y="${y-5}" font-size="10" font-weight="700" fill="var(--heading)" text-anchor="middle">${fmt?fmt(v):v}</text>
+        <text x="${x+bw/2}" y="${H-8}" font-size="9.5" fill="var(--muted)" text-anchor="middle">${labels[i]}</text>`;});
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%">${s}</svg>`;
+}
+const stat={g:s=>`<span class="pill g">${s}</span>`,w:s=>`<span class="pill w">${s}</span>`,r:s=>`<span class="pill r">${s}</span>`,b:s=>`<span class="pill b">${s}</span>`,n:s=>`<span class="pill n">${s}</span>`};
+
+const AG={ balance:{n:'Balance Staffing',dot:'#1f66f0',w:74,e:0,s:74,fill:'92.8%',ttf:'2.4 days',to:'20.5%',comp:'97.8%',spend:'$0.86M',trend:[90.1,90.8,91.4,91.9,92.4,92.8],
+   verdict:`<div class="notice">✦ <b>VINessa's assessment: Grow.</b> Southgate-focused partner onboarded in March — steady climb on fill and retention every month since. Strongest candidate-quality scores in the program for assembly roles. Allocation share positioned to grow next cycle.</div>`,
+   reqs:[['<b>REQ-1188</b>','Material Handler · Southgate · 1st',3,'3 confirmed · started Jul 6',stat.g('Complete')]]},
+ summit:{n:'Summit Staffing Group',dot:'#0d9488',w:128,e:82,s:46,fill:'94.1%',ttf:'2.1 days',to:'19.2%',comp:'98.4%',spend:'$1.53M',trend:[92.0,92.6,93.1,93.4,93.8,94.1],
+   verdict:`<div class="notice">✦ <b>VINessa's assessment: Expand.</b> Best-in-program on fill, speed, retention, and compliance for two consecutive quarters. Allocation share raised 38% → 45% this cycle under Meridian's performance-based rules.</div>`,
+   reqs:[['<b>REQ-1191</b>','Assembler II · Southgate · 2nd',14,'9 confirmed · due Fri',stat.b('On pace')],['<b>REQ-1187</b>','CNC Operator · Eastport · 1st',4,'4 in client review',stat.g('Complete')],['<b>REQ-1185</b>','Forklift Op · Eastport · 3rd',4,'3 confirmed · 1 pending cert',stat.w('1 blocked')]]},
+ ironbridge:{n:'IronBridge Workforce',dot:'#d97706',w:121,e:74,s:47,fill:'84.7%',ttf:'3.8 days',to:'31.4%',comp:'93.1%',spend:'$1.38M',trend:[88.4,87.6,86.9,86.1,85.3,84.7],
+   verdict:`<div class="notice" style="background:var(--warnbg);border-color:var(--warnline)">▲ <b>VINessa's assessment: Review.</b> Fill rate has declined six consecutive months. Candidate pool averages 8 months relevant experience vs 19 for Summit — early-tenure churn follows (46% of their exits occur inside 30 days). Two compliance document lapses in 90 days. Recommended: performance plan with 60-day targets; allocation reduced 35% → 20% until retention recovers.</div><div class="d-actions" style="margin-top:12px"><button class="btn btn-primary" onclick="approve(this,'Performance plan issued to IronBridge · 60-day targets set')">Issue performance plan</button></div>`,
+   reqs:[['<b>REQ-1193</b>','Assembler II · Southgate · 2nd',5,'1 confirmed · nudged Jul 13',stat.w('At risk')]]},
+ talentflow:{n:'TalentFlow Solutions',dot:'#7c3aed',w:98,e:58,s:40,fill:'90.2%',ttf:'2.9 days',to:'21.8%',comp:'97.0%',spend:'$1.21M',trend:[88.9,89.3,89.6,89.8,90.0,90.2],
+   verdict:`<div class="notice">✦ <b>VINessa's assessment: Grow.</b> Steady improvement across all metrics; strongest submittal-to-hire ratio in the program. Watch item: OT billing drift of +2.4% over contracted assumptions (see INV-2214). Allocation raised 25% → 35%.</div>`,
+   reqs:[['<b>REQ-1192</b>','Assembler II · Southgate · 2nd',9,'5 confirmed · due Fri',stat.b('On pace')],['<b>REQ-1182</b>','Quality Inspector · Southgate · 1st',3,'Filled in 2.6 days',stat.g('Complete')]]}};
+
+function agencyDrill(k){const a=AG[k];return {t:`<span class="agency-dot" style="background:${a.dot}"></span>${a.n}`,s:'Partner detail · 90-day window · both facilities',b:
+ dkr([['Active workers',a.w],['Fill rate',a.fill],['Time to fill',a.ttf],['90-day turnover',a.to],['Compliance',a.comp],['Spend (90d)',a.spend]])+
+ `<div class="drill-h3">Fill rate — 6 months</div>`+colChart(a.trend,['Feb','Mar','Apr','May','Jun','Jul'],v=>v+'%')+
+ `<div class="drill-h3">Workers by facility</div>`+dtbl(['Facility','Workers','Share'],[['Eastport Plant',a.e,Math.round(a.e/a.w*100)+'%'],['Southgate Plant',a.s,Math.round(a.s/a.w*100)+'%']])+
+ `<div class="drill-h3">Active requisitions</div>`+dtbl(['Req','Role','Positions','Progress','Status'],a.reqs)+a.verdict+vbtn('exec-agencies')};}
+
+const REQS={
+ '1191':{role:'Assembler II',fac:'Southgate Plant · 2nd shift',ag:'Summit Staffing',pos:14,due:'Mon, Jul 20',
+  st:[['Distributed',14],['Submitted',16],['Screened',13],['Confirmed',9],['Started',0,1]],
+  cands:[['<b>C. Romero</b>','Screened · 94 fit',stat.g('Confirmed')],['<b>B. Kowalski</b>','Screened · 91 fit',stat.g('Confirmed')],['<b>E. Haddad</b>','Screened · 90 fit',stat.g('Confirmed')],['<b>N. Fitzgerald</b>','Screened · 88 fit',stat.g('Confirmed')],['<b>G. Mbeki</b>','Screened · 86 fit',stat.b('Offer out')],['<b>H. Yoder</b>','Screened · 82 fit',stat.b('Offer out')],['<b>P. Lindqvist</b>','Shift mismatch flagged',stat.w('Replaced')]],
+  tl:[['Jul 10 · 9:14 AM','Req released by M. Reed — auto-distributed under allocation rules'],['Jul 10 · 11:02 AM','Summit acknowledged · committed to Friday EOD'],['Jul 12 · 3:40 PM','16 candidates submitted · VINessa screened all against certs, shift &amp; tenure'],['Jul 13 · 8:15 AM','2 flagged for shift mismatch — Summit auto-notified, replacements submitted'],['Jul 14 · 6:00 AM','Projection updated: 13–14 of 14 by Friday · 87% confidence']],
+  note:`<div class="d-rec"><b>VINessa projection:</b> 13–14 of 14 seats confirmed by Friday EOD (87% confidence). No action needed from you — I'll escalate if Summit's confirmation pace drops below plan.</div>`},
+ '1192':{role:'Assembler II',fac:'Southgate Plant · 2nd shift',ag:'TalentFlow Solutions',pos:9,due:'Mon, Jul 20',
+  st:[['Distributed',9],['Submitted',11],['Screened',8],['Confirmed',5],['Started',0,1]],
+  cands:[['<b>V. Ramos</b>','Screened · 92 fit',stat.g('Confirmed')],['<b>W. Chen</b>','Screened · 89 fit',stat.g('Confirmed')],['<b>F. Abebe</b>','Screened · 87 fit',stat.g('Confirmed')],['<b>Y. Dominguez</b>','Screened · 84 fit',stat.b('Offer out')],['<b>O. Novak</b>','Screened · 83 fit',stat.b('Offer out')]],
+  tl:[['Jul 10 · 9:14 AM','Req released — auto-distributed'],['Jul 10 · 1:46 PM','TalentFlow acknowledged'],['Jul 13 · 10:20 AM','11 candidates submitted · 8 passed screening'],['Jul 14 · 6:00 AM','Projection: 8–9 of 9 by Friday · 81% confidence']],
+  note:`<div class="d-rec"><b>VINessa projection:</b> 8–9 of 9 by Friday EOD. On pace.</div>`},
+ '1193':{role:'Assembler II',fac:'Southgate Plant · 2nd shift',ag:'IronBridge Workforce',pos:5,due:'Mon, Jul 20',
+  st:[['Distributed',5],['Submitted',3],['Screened',2],['Confirmed',1],['Started',0,1]],
+  cands:[['<b>I. Petrov</b>','Screened · 79 fit',stat.g('Confirmed')],['<b>Q. Farah</b>','Screening in progress',stat.w('Pending')],['<b>Z. Whitman</b>','Docs incomplete',stat.r('Blocked')]],
+  tl:[['Jul 10 · 9:14 AM','Req released — auto-distributed'],['Jul 11 · 4:55 PM','IronBridge acknowledged (31 hrs — slowest in program)'],['Jul 13 · 9:00 AM','VINessa nudge sent: submission pace below plan'],['Jul 14 · 6:00 AM','Projection: 2–3 of 5 by Friday · <b style="color:var(--bad)">fill risk flagged to Dana &amp; Marcus</b>']],
+  note:`<div class="d-rec" style="background:var(--badbg);border-color:var(--badline)"><b>VINessa flag:</b> IronBridge fills 43% of similar reqs within 5 days. This req drives Monday's projected 12-seat gap. Redistribution plan is drafted and awaiting approval.</div><div class="d-actions" style="margin-top:12px"><button class="btn btn-primary" onclick="closeModal();cur==='sup'?toast('Not available in partner workspace'):(showPage('ops-reqs'),setTimeout(openModal,300))">Open redistribution plan</button></div>`},
+ '1187':{role:'CNC Machine Operator',fac:'Eastport Plant · 1st shift',ag:'Summit (4) + TalentFlow (2)',pos:6,due:'Wed, Jul 22',
+  st:[['Distributed',6],['Submitted',9],['Screened',6],['Client review',6],['Confirmed',0,1]],
+  cands:[['<b>R. Delgado</b>','Summit · 96 fit · OSHA-10 ✓',stat.b('Fast-track ready')],['<b>K. Barnes</b>','Summit · 93 fit · OSHA-10 ✓',stat.b('Fast-track ready')],['<b>A. Osei</b>','TalentFlow · 91 fit · OSHA-10 ✓',stat.b('Fast-track ready')],['<b>L. Tran</b>','Summit · 88 fit · OSHA-10 ✓',stat.b('Fast-track ready')],['<b>J. Whitmore</b>','TalentFlow · cert verification requested',stat.w('Pending')],['<b>S. Patel</b>','Summit · cert verification requested',stat.w('Pending')]],
+  tl:[['Jul 8','Req released · split by 1st-shift fill history'],['Jul 11','9 submitted · 6 passed VINessa screening'],['Jul 14 · 6:00 AM','4 recommended for fast-track — awaiting Marcus']],
+  note:`<div class="d-rec"><b>VINessa recommends:</b> fast-track the 4 verified candidates today; the 2 pending certs clear automatically once suppliers upload.</div>`},
+ '1185':{role:'Forklift Operator (PIT)',fac:'Eastport Plant · 3rd shift',ag:'Summit Staffing',pos:4,due:'Fri, Jul 24',
+  st:[['Distributed',4],['Submitted',5],['Screened',4],['Confirmed',3],['Started',0,1]],
+  cands:[['<b>U. Sandoval</b>','PIT cert current',stat.g('Confirmed')],['<b>X. Li</b>','PIT cert current',stat.g('Confirmed')],['<b>D. Merritt</b>','PIT cert current',stat.g('Confirmed')],['<b>T. Vaughn</b>','PIT cert upload required',stat.w('Blocked')]],
+  tl:[['Jul 9','Req released to Summit'],['Jul 12','5 submitted · 4 screened'],['Jul 14','3 confirmed · 1 blocked on certification upload']],
+  note:`<div class="d-rec"><b>VINessa:</b> the blocked candidate clears the moment Summit uploads the PIT certificate — request already sent.</div>`},
+ '1188':{role:'Material Handler',fac:'Southgate Plant · 1st shift',ag:'Balance Staffing',pos:3,due:'Filled',
+  st:[['Distributed',3],['Submitted',5],['Screened',4],['Confirmed',3],['Started',3]],
+  cands:[['<b>R. Salazar</b>','Started Jul 6',stat.g('Active')],['<b>S. Ahmadi</b>','Started Jul 6',stat.g('Active')],['<b>J. Whitcomb</b>','Started Jul 7',stat.g('Active')]],
+  tl:[['Jun 29','Req released to Balance Staffing'],['Jul 2','5 submitted · 4 passed screening'],['Jul 6–7','All 3 started · onboarding complete']],
+  note:`<div class="d-rec"><b>Outcome:</b> filled in 2.2 days — fastest fill for this role this quarter. All three passed their 1-week check-in.</div>`},
+ '1182':{role:'Quality Inspector',fac:'Southgate Plant · 1st shift',ag:'TalentFlow Solutions',pos:3,due:'Filled',
+  st:[['Distributed',3],['Submitted',5],['Screened',4],['Confirmed',3],['Started',3]],
+  cands:[['<b>M. Beaumont</b>','Started Jul 6',stat.g('Active')],['<b>A. Kaur</b>','Started Jul 6',stat.g('Active')],['<b>R. Ostrowski</b>','Started Jul 7',stat.g('Active')]],
+  tl:[['Jun 30','Req released'],['Jul 2','Filled in 2.6 days avg'],['Jul 6–7','All 3 started · onboarding complete']],
+  note:`<div class="d-rec"><b>Outcome:</b> filled 40% faster than program average for this role. All three passed 1-week check-in.</div>`}};
+
+function reqDrill(n){const r=REQS[n];if(!r)return null;
+ const supScoped=cur==='sup';
+ const cands=supScoped?r.cands.filter(c=>!c[1].includes('TalentFlow')):r.cands;
+ return {t:`REQ-${n} — ${r.role}`,s:`${r.fac} · need by ${r.due}${supScoped?' · your allocation only':''}`,b:
+  dkr([['Positions',supScoped&&n==='1187'?'4 <small>of 6 (yours)</small>':r.pos],['Distributed to',r.ag],['Need by',r.due]])+
+  `<div class="drill-h3">Pipeline</div>`+funnel(r.st)+
+  `<div class="drill-h3">Candidates${supScoped?' (your submissions)':''}</div>`+dtbl(['Candidate','Screening','Status'],cands)+
+  `<div class="drill-h3">Activity</div>`+tline(r.tl)+r.note+(supScoped?'':vbtn(cur==='ops'?'ops-monday':'exec-monday'))};}
+
+const INVS={
+ '2209':{ag:'Summit Staffing',per:'Jul 1–7 · Eastport',amt:'$96,410',clean:1,lines:[['Regular hours — 82 workers','3,642.0 hrs · $23.10','$84,127',stat.g('✓ Matched')],['Overtime — approved','285.5 hrs · $34.65','$9,893',stat.g('✓ Matched')],['Weekend differential','contracted','$2,390',stat.g('✓ Matched')]],
+  note:'Every line matched approved timesheets, badge data, and contracted rates. 11th consecutive clean week from Summit.'},
+ '2210':{ag:'Summit Staffing',per:'Jul 1–7 · Southgate',amt:'$41,220',clean:1,lines:[['Regular hours — 44 workers','1,651.0 hrs · $23.10','$38,140',stat.g('✓ Matched')],['Overtime — approved','69.1 hrs · $34.65','$2,394',stat.g('✓ Matched')],['Shift differential','contracted','$686',stat.g('✓ Matched')]],
+  note:'Reconciled clean. Approved for payment Jul 17.'},
+ '2212':{ag:'IronBridge Workforce',per:'Jul 1–7 · Eastport',amt:'$88,340',clean:1,lines:[['Regular hours — 74 workers','3,609.0 hrs · $22.45','$81,020',stat.g('✓ Matched')],['Overtime — approved','181.4 hrs · $33.68','$6,110',stat.g('✓ Matched')],['Shift differential','contracted','$1,210',stat.g('✓ Matched')]],
+  note:'Reconciled clean. Approved for payment Jul 17.'},
+ '2214':{ag:'TalentFlow Solutions',per:'Jul 1–7 · Southgate',amt:'$44,000',clean:0,lines:[['Regular hours — 40 workers','1,560.0 hrs · $23.85','$37,206',stat.g('✓ Matched')],['Overtime — approved','129.0 hrs · $35.78','$4,616',stat.g('✓ Matched')],['<b style="color:var(--bad)">Overtime — no approved timesheet</b>','37.0 hrs · $35.78','$1,324',stat.r('▲ No approval')],['<b style="color:var(--bad)">Weekend diff. on unapproved hrs</b>','—','$854',stat.r('▲ No approval')]],
+  note:'<b>$2,178 in question.</b> VINessa matched every billed hour against approved timesheets and badge scans — 37 OT hours have no corresponding approval. Recommend: hold the flagged lines, auto-generate the dispute with reconciliation attached, release the clean $41,822 on time.',
+  act:`<div class="d-actions" style="margin-top:14px"><button class="btn btn-primary" onclick="approve(this,'Dispute filed with reconciliation · $41,822 released for payment')">Hold flagged lines &amp; dispute</button><button class="btn btn-ghost" onclick="approve(this,'Routed to Finance with full reconciliation attached')">Route to Finance</button></div>`},
+ '2215':{ag:'IronBridge Workforce',per:'Jul 1–7 · Southgate',amt:'$31,890',clean:0,lines:[['Regular hours — 45 workers','1,320.4 hrs · $22.45','$29,644',stat.g('✓ Matched')],['<b style="color:var(--warn)">Rate variance — 2 workers</b>','410.4 hrs billed @ $24.95 vs $22.45','$1,026',stat.w('▲ Above contract')],['Shift differential','contracted','$1,220',stat.g('✓ Matched')]],
+  note:'<b>$1,026 rate variance.</b> Two workers billed at $24.95/hr against a contracted $22.45. Recommend requesting a corrected invoice — IronBridge\'s third rate variance this quarter.',
+  act:`<div class="d-actions" style="margin-top:14px"><button class="btn btn-primary" onclick="approve(this,'Corrected invoice requested from IronBridge')">Request corrected invoice</button></div>`}};
+
+function invDrill(n){const v=INVS[n];if(!v)return null;
+ return {t:`INV-${n} — ${v.ag}`,s:`${v.per} · line-by-line reconciliation by VINessa`,b:
+  dkr([['Invoice total',v.amt],['Reconciliation',v.clean?'Clean':'Exceptions'],['Status',v.clean?'Approved · pays Jul 17':'Held pending decision']])+
+  `<div class="drill-h3">Line items vs. approved time</div>`+dtbl(['Line item','Basis','Amount','Reconciliation'],v.lines)+
+  `<div class="notice">${v.clean?'✓ ':'▲ '}${v.note}</div>`+(v.act||'')+(cur==='sup'?'':vbtn('ops-invoice'))};}
+
+const WKRS={
+ 'alvarez':{n:'J. Alvarez',ag:'Summit Staffing',role:'Forklift Operator (PIT)',fac:'Eastport · Receiving Line 1 · 1st shift',start:'Oct 14, 2025',ten:'9 months',att:'98.2%',
+  certs:[['Forklift (PIT)',stat.r('Expires Jul 18'),'Renewal held · Thu 1:00 PM'],['OSHA-10',stat.g('Valid to Mar 2027'),'—'],['I-9 / E-Verify',stat.g('Complete'),'—'],['Drug screen',stat.g('Complete'),'—']],
+  note:'Top-quartile productivity in Materials Handling. Renewal scheduled around posted shifts — zero lost hours.'},
+ 'okafor':{n:'T. Okafor',ag:'Summit Staffing',role:'Forklift Operator (PIT)',fac:'Eastport · Receiving Line 1 · 1st shift',start:'Jan 5, 2026',ten:'6 months',att:'97.5%',
+  certs:[['Forklift (PIT)',stat.r('Expires Jul 19'),'Renewal held · Thu 3:00 PM'],['OSHA-10',stat.g('Valid to Jun 2027'),'—'],['I-9 / E-Verify',stat.g('Complete'),'—'],['Drug screen',stat.g('Complete'),'—']],
+  note:'Reliable attendance; cross-trained on shipping dock equipment.'},
+ 'castillo':{n:'M. Castillo',ag:'IronBridge Workforce',role:'Forklift Operator (PIT)',fac:'Eastport · Receiving Line 2 · 2nd shift',start:'Mar 2, 2026',ten:'4 months',att:'95.1%',
+  certs:[['Forklift (PIT)',stat.w('Expires Jul 21'),'Renewal held · Fri 9:00 AM'],['OSHA-10',stat.g('Valid to Feb 2027'),'—'],['I-9 / E-Verify',stat.g('Complete'),'—'],['Drug screen',stat.g('Complete'),'—']],
+  note:'One attendance flag in June — resolved after schedule adjustment.'},
+ 'nguyen':{n:'D. Nguyen',ag:'TalentFlow Solutions',role:'Forklift Operator (PIT)',fac:'Eastport · Shipping Dock · 1st shift',start:'Nov 20, 2025',ten:'8 months',att:'99.0%',
+  certs:[['Forklift (PIT)',stat.w('Expires Jul 22'),'Renewal held · Fri 11:00 AM'],['OSHA-10',stat.g('Valid to Nov 2026'),'—'],['I-9 / E-Verify',stat.g('Complete'),'—'],['Drug screen',stat.g('Complete'),'—']],
+  note:'Highest attendance in Shipping. Flagged by VINessa as conversion-to-perm candidate.'}};
+
+function workerDrill(k){const w=WKRS[k];if(!w)return null;
+ return {t:w.n,s:`${w.role} · ${w.ag}`,b:
+  dkr([['Assignment',w.fac.split('·')[0]],['Shift',w.fac.split('·').pop()],['Started',w.start],['Tenure',w.ten],['Attendance',w.att]])+
+  `<div class="drill-h3">Compliance record</div>`+dtbl(['Document','Status','VINessa action'],w.certs)+
+  `<div class="notice">✦ ${w.note}</div>`+
+  `<div class="d-actions" style="margin-top:14px"><button class="btn btn-primary" onclick="approve(this,'Renewal confirmed · worker and supplier notified')">Confirm renewal slot</button></div>`};}
+
+const ROSTER=[['<b>C. Romero</b>','Summit','Assembler II','Southgate · 2nd','3 mo',stat.g('Active')],['<b>B. Kowalski</b>','Summit','Assembler II','Eastport · 1st','11 mo',stat.g('Active')],['<b>I. Petrov</b>','IronBridge','Welder','Southgate · 2nd','1 mo',stat.w('Turnover watch')],['<b>V. Ramos</b>','TalentFlow','Quality Insp.','Southgate · 1st','6 mo',stat.g('Active')],['<b>J. Alvarez</b>','Summit','Forklift Op','Eastport · 1st','9 mo',stat.w('Cert expiring')],['<b>W. Chen</b>','TalentFlow','Assembler II','Eastport · 2nd','14 mo',stat.g('Active')],['<b>E. Haddad</b>','Summit','CNC Operator','Eastport · 1st','7 mo',stat.g('Active')],['<b>Q. Farah</b>','IronBridge','Material Handler','Eastport · 3rd','2 mo',stat.g('Active')]];
+
+const DRILL={
+ workers:()=>({t:'Active Workers — 421',s:'Every worker, every agency, every shift — one live roster',b:
+  dkr([['Total active',421],['Eastport',214],['Southgate',207],['Avg tenure','7.4 mo'],['30-day growth','+41']])+
+  `<div class="drill-h3">By partner and facility</div>`+dtbl(['Partner','Eastport','Southgate','Total'],[
+   ['<b>Summit Staffing</b>',82,46,'<b>128</b>'],['<b>Balance Staffing</b>',0,74,'<b>74</b>'],['<b>IronBridge Workforce</b>',74,47,'<b>121</b>'],['<b>TalentFlow Solutions</b>',58,40,'<b>98</b>']])+
+  `<div class="drill-h3">By shift</div>`+dtbl(['Shift','Workers','Share'],[['1st (6a–2p)',209,'60%'],['2nd (2p–10p)',101,'29%'],['3rd (10p–6a)',37,'11%']])+
+  `<div class="drill-h3">Roster</div>`+dtbl(['Worker','Agency','Role','Facility · Shift','Tenure','Status'],ROSTER,'+ 413 more — filter, sort &amp; export in the live platform, or simply ask VINessa')+vbtn('exec-brief')}),
+ fill:()=>({t:'Fill Rate — 91.4%',s:'Position fill by facility and shift · updated live from supplier confirmations',b:
+  dkr([['Program',' 91.4%'],['Eastport','93.0%'],['Southgate','88.1%'],['Open positions',43],['At-risk (Mon)','12 seats']])+
+  `<div class="drill-h3">Today, by shift</div>`+dtbl(['Facility · Shift','Required','Filled','Fill'],[
+   ['Eastport · 1st',152,148,'<div class="bar"><i style="width:97%"></i></div>'],['Eastport · 2nd',66,62,'<div class="bar warn"><i style="width:94%"></i></div>'],['Eastport · 3rd',40,38,'<div class="bar"><i style="width:95%"></i></div>'],
+   ['Southgate · 1st',82,79,'<div class="bar"><i style="width:96%"></i></div>'],['Southgate · 2nd',47,44,'<div class="bar warn"><i style="width:94%"></i></div>'],['Southgate · 3rd',11,10,'<div class="bar"><i style="width:91%"></i></div>']])+
+  `<div class="drill-h3">6-week trend</div>`+colChart([87.2,88.1,89.0,89.9,90.6,91.4],['Jun 8','Jun 15','Jun 22','Jun 29','Jul 6','Jul 13'],v=>v+'%')+
+  `<div class="notice">▲ Monday's week-3 ramp adds 28 positions at Southgate. Without the redistribution now in your decision queue, projected fill drops to 88% program-wide.</div>`+vbtn('exec-monday')}),
+ turnover:()=>({t:'90-Day Turnover — 24.1%',s:'84 exits across 90 days · analyzed by agency, tenure, and cause',b:
+  dkr([['90-day rate','24.1%'],['Exits (90d)',84],['Inside 30 days','46%'],['Cost per exit','$2,340'],['90-day churn cost','$197K']])+
+  `<div class="drill-h3">By partner</div>`+dtbl(['Partner','Exits','Rate','Avg tenure at exit'],[
+   ['<b>Summit Staffing</b>',25,'<span class="best">19.2%</span>','5.8 mo'],['<b>TalentFlow Solutions</b>',21,'21.8%','4.9 mo'],['<b>IronBridge Workforce</b>',38,'<span class="worst">31.4%</span>','<span class="worst">2.7 mo</span>']])+
+  `<div class="drill-h3">By tenure at exit</div>`+dtbl(['Tenure','Exits','Share'],[['Under 30 days',39,'46%'],['31–60 days',20,'24%'],['61–90 days',12,'14%'],['Over 90 days',13,'16%']])+
+  `<div class="drill-h3">Recent exits</div>`+dtbl(['Worker','Agency','Dept · Shift','Tenure','Primary cause'],[
+   ['A. Brennan','IronBridge','Weld · 2nd (SG)','18 days','Higher pay nearby (+$1.25/hr)'],['S. Okonkwo','IronBridge','Weld · 2nd (SG)','22 days','Higher pay nearby'],['D. Reyes','IronBridge','Weld · 2nd (SG)','11 days','Job abandonment'],['K. Muller','TalentFlow','Assembly · 2nd (SG)','44 days','Schedule conflict'],['L. Novotny','IronBridge','Assembly · 1st (EP)','26 days','Higher pay nearby'],['P. Singh','Summit','Quality · 1st (SG)','7.2 mo','Converted to permanent ✓']],'+ 78 more · full exit analysis available from VINessa')+
+  `<div class="notice">▲ <b>The pattern:</b> wage drift ($1.10/hr in 60 days), one partner's shallow sourcing pool, and a hotspot on the Southgate weld line explain 82% of exits. All three fixes are drafted.</div>`+vbtn('exec-turnover')}),
+ compliance:()=>({t:'Compliance — 96.2%',s:'Every document, every worker, tracked daily',b:
+  dkr([['Fully compliant','334 / 347'],['Expiring ≤10d',14],['Missing docs',3],['Audit trail','100%']])+
+  `<div class="drill-h3">By document type</div>`+dtbl(['Document','Compliant','Expiring ≤10d','Missing'],[
+   ['I-9 / E-Verify','347','—','—'],['Drug screening','347','—','—'],['OSHA-10','344','—','<span class="worst">3</span>'],['Forklift (PIT) certification','75 of 89','<span style="color:var(--warn);font-weight:700">14</span>','—'],['Site safety orientation','347','—','—']])+
+  `<div class="drill-h3">Blocked from schedule</div>`+dtbl(['Worker','Agency','Missing','Status'],[
+   ['R. Vance','IronBridge','OSHA-10',stat.r('Blocked · supplier notified')],['T. Adeyemi','IronBridge','OSHA-10',stat.r('Blocked · supplier notified')],['J. Kwan','TalentFlow','OSHA-10',stat.r('Blocked · training booked Jul 16')]])+
+  `<div class="notice">✦ Non-compliant workers are excluded from schedules automatically — a lapse can't reach your floor. Full document trail retained for audit.</div>`+vbtn('exec-compliance')}),
+ spend:()=>({t:'Contingent Spend — $1.42M / month',s:'90-day program spend: $4.12M · reconciled to approved time',b:
+  dkr([['July run-rate','$1.42M'],['90-day total','$4.12M'],['vs plan','+4.6%'],['OT share','7.3%'],['Billing errors caught','$38.7K']])+
+  `<div class="drill-h3">Monthly trend</div>`+colChart([0.98,1.08,1.21,1.31,1.38,1.42],['Feb','Mar','Apr','May','Jun','Jul'],v=>'$'+v.toFixed(2)+'M')+
+  `<div class="drill-h3">By partner (90 days)</div>`+dtbl(['Partner','Spend','Avg bill rate','True cost / productive hr'],[
+   ['<b>Summit Staffing</b>','$1.53M','$23.10','<span class="best">$24.62</span>'],['<b>IronBridge Workforce</b>','$1.38M','<span class="best">$22.45</span>','<span class="worst">$27.94</span>'],['<b>TalentFlow Solutions</b>','$1.21M','$23.85','$25.71']])+
+  `<div class="drill-h3">By category (90 days)</div>`+dtbl(['Category','Amount','Share'],[
+   ['Regular hours','$3.38M','82.0%'],['Overtime','$301K','7.3%'],['Agency fees','$252K','6.1%'],['Shift differentials','$128K','3.1%'],['Other','$62K','1.5%']])+
+  `<div class="notice">▲ Overtime concentrates at Southgate 2nd shift — mostly backfill for unfilled seats. Filling Monday's ramp properly cuts OT structurally, not cosmetically.</div>`+vbtn('exec-spend')}),
+ invoices:()=>({t:'Invoices Pending — $318K',s:'7 invoices · 5 reconciled clean · 2 exceptions — click any row for line-level detail',b:
+  dkr([['Pending','$318K'],['Clean','5 of 7'],['Exceptions','$3,204 in question'],['Cycle time','6.4 days'],['Recovered YTD','$38.7K']])+
+  dtbl(['Invoice','Agency','Period','Amount','Reconciliation'],[
+   ['<b>INV-2209</b>','Summit','Jul 1–7','$96,410',stat.g('✓ Clean')],['<b>INV-2210</b>','Summit','Jul 1–7','$41,220',stat.g('✓ Clean')],['<b>INV-2212</b>','IronBridge','Jul 1–7','$88,340',stat.g('✓ Clean')],['<b>INV-2214</b>','TalentFlow','Jul 1–7','$44,000',stat.r('▲ $2,178 unapproved OT')],['<b>INV-2215</b>','IronBridge','Jul 1–7','$31,890',stat.w('▲ $1,026 rate variance')]])+
+  `<div class="notice">✦ Every invoice line is matched to approved timesheets, badge data, and contracted rates before it reaches a human. Click a row to see the reconciliation.</div>`+vbtn('ops-invoice')}),
+ recovered:()=>({t:'Recovered YTD — $38.7K',s:'Billing errors caught by VINessa reconciliation before payment',b:
+  dkr([['Recovered','$38.7K'],['Errors caught',23],['Largest single','$4.9K'],['Detection','100% automatic']])+
+  dtbl(['Date','Agency','Error type','Amount','Status'],[
+   ['Jul 14','TalentFlow','Unapproved OT hours','$2,178',stat.w('In dispute')],['Jul 14','IronBridge','Rate above contract','$1,026',stat.w('In dispute')],['Jun 30','IronBridge','Duplicate line item','$4,905',stat.g('Recovered')],['Jun 23','TalentFlow','Hours vs badge mismatch','$1,840',stat.g('Recovered')],['Jun 9','IronBridge','Rate above contract','$962',stat.g('Recovered')],['May 26','Summit','Differential misapplied','$412',stat.g('Recovered')]],'+ 17 more · full history exportable')+
+  `<div class="notice">✦ Before Velocity, these errors were found only when someone had time to audit — usually never. Now every line is checked, every week, automatically.</div>`}),
+ 'agency-balance':()=>agencyDrill('balance'),
+ 'agency-summit':()=>agencyDrill('summit'),
+ 'agency-ironbridge':()=>agencyDrill('ironbridge'),
+ 'agency-talentflow':()=>agencyDrill('talentflow'),
+ 'facility-eastport':()=>({t:'Eastport Plant — Columbus, OH',s:'214 contingent workers · 3 shifts · 5 departments',b:
+  dkr([['Workers',214],['Fill rate','93.0%'],['90-day turnover','20.1%'],['Open reqs',6],['OT share','6.1%']])+
+  `<div class="drill-h3">Today, by shift</div>`+dtbl(['Shift','Required','Filled','Status'],[['1st (6a–2p)',152,148,stat.g('Healthy')],['2nd (2p–10p)',66,62,stat.w('4 open · covered')],['3rd (10p–6a)',40,38,stat.g('Healthy')]])+
+  `<div class="drill-h3">By department</div>`+dtbl(['Department','Workers','Turnover (90d)'],[['Assembly',96,'18.9%'],['Materials Handling',44,'16.2%'],['CNC / Machining',32,'14.8%'],['Quality',22,'19.5%'],['Shipping',20,'22.1%']])+
+  `<div class="drill-h3">Partner mix</div>`+dtbl(['Partner','Workers'],[['<b>Summit Staffing</b>',82],['<b>IronBridge Workforce</b>',74],['<b>TalentFlow Solutions</b>',58]])+
+  `<div class="notice">✦ Stable operation. Watch item: 14 forklift certifications expiring in Materials Handling — renewals drafted.</div>`+vbtn('exec-compliance')}),
+ 'facility-southgate':()=>({t:'Southgate Plant — Louisville, KY',s:'207 contingent workers · mid-ramp · +28 positions Monday',b:
+  dkr([['Workers',207],['Fill rate','88.1%'],['90-day turnover','29.8%'],['Open reqs',9],['OT share','9.2%']])+
+  `<div class="drill-h3">Today, by shift</div>`+dtbl(['Shift','Required','Filled','Status'],[['1st (6a–2p)',82,79,stat.g('Healthy')],['2nd (2p–10p)',47,44,stat.w('3 open')],['3rd (10p–6a)',11,10,stat.g('Healthy')]])+
+  `<div class="drill-h3">By department</div>`+dtbl(['Department','Workers','Turnover (90d)'],[['Assembly',122,'26.4%'],['<b>Weld</b>',24,'<span class="worst">41.2%</span>'],['Quality',28,'21.0%'],['Shipping',33,'25.3%']])+
+  `<div class="drill-h3">Monday's ramp (week 3)</div>`+dtbl(['Req','Partner','Positions','Confirmed'],[['<b>REQ-1191</b>','Summit',14,9],['<b>REQ-1192</b>','TalentFlow',9,5],['<b>REQ-1193</b>','IronBridge',5,1]])+
+  `<div class="notice">▲ <b>Two issues, one root cause:</b> the weld-line turnover hotspot and the 2nd-shift fill gap both trace to a $1.10/hr local wage drift. Rate adjustment and redistribution are both drafted.</div>`+vbtn('exec-turnover')}),
+ 'shift-e1':()=>shiftDrill('1st Shift · 6a–2p',152,148,[['<b>B. Kowalski</b>','Summit','Assembly · Line 2',stat.g('Badged in 5:47a')],['<b>J. Alvarez</b>','Summit','Receiving Line 1',stat.g('Badged in 5:52a')],['<b>E. Haddad</b>','Summit','CNC · Cell 4',stat.g('Badged in 5:44a')],['<b>D. Nguyen</b>','TalentFlow','Shipping Dock',stat.g('Badged in 5:39a')],['<b>L. Novak</b>','IronBridge','Assembly · Line 1',stat.w('Backfill · arrived 6:20a')],['<b>M. Osei</b>','TalentFlow','Quality',stat.g('Badged in 5:58a')],['<b>R. Vance</b>','IronBridge','Assembly · Line 3',stat.r('No-show · backfilled')],['<b>T. Okafor</b>','Summit','Receiving Line 1',stat.g('Badged in 5:50a')]],
+  'Two no-shows this morning — both backfilled from supplier standby within 40 minutes. Two seats remain open on Line 3; supervisors confirmed cross-trained coverage.'),
+ 'shift-e2':()=>shiftDrill('2nd Shift · 2p–10p',66,62,[['<b>W. Chen</b>','TalentFlow','Assembly · Line 2',stat.b('Confirmed for 2p')],['<b>M. Castillo</b>','IronBridge','Receiving Line 2',stat.b('Confirmed for 2p')],['<b>G. Mbeki</b>','Summit','Assembly · Line 1',stat.b('Confirmed for 2p')],['<b>H. Yoder</b>','Summit','CNC · Cell 2',stat.b('Confirmed for 2p')],['<b>F. Abebe</b>','TalentFlow','Quality',stat.b('Confirmed for 2p')],['<b>Open seat × 4</b>','—','Assembly · Line 3',stat.w('Cross-trained coverage confirmed')]],
+  '4 open seats on Line 3 — line supervisors confirmed coverage from cross-trained 1st-shift holdovers. VINessa has standing backfill requests with Summit and TalentFlow if confirmations slip.'),
+ 'shift-e3':()=>shiftDrill('3rd Shift · 10p–6a',40,38,[['<b>Q. Farah</b>','IronBridge','Materials Handling',stat.b('Confirmed for 10p')],['<b>U. Sandoval</b>','Summit','Forklift · Receiving',stat.b('Confirmed for 10p')],['<b>X. Li</b>','Summit','Forklift · Shipping',stat.b('Confirmed for 10p')],['<b>K. Brandt</b>','TalentFlow','Assembly · Line 1',stat.b('Confirmed for 10p')],['<b>Open seat × 2</b>','—','Assembly · Line 2',stat.w('Backfill requested')]],
+  'Two open seats — backfill requests sent to Summit at 5:45 AM; historical response time for 3rd-shift backfills is 3.1 hours.'),
+ 'sup-workers':()=>({t:'Your Workers — 128',s:'Summit Staffing Group · Meridian program · your data only',b:
+  dkr([['Active workers',128],['Eastport',82],['Southgate',46],['90-day retention','80.8%'],['Avg tenure','8.1 mo']])+
+  `<div class="drill-h3">Roster</div>`+dtbl(['Worker','Role','Facility · Shift','Tenure','Status'],[
+   ['<b>C. Romero</b>','Assembler II','Southgate · 2nd','3 mo',stat.g('Active')],['<b>B. Kowalski</b>','Assembler II','Eastport · 1st','11 mo',stat.g('Active')],['<b>J. Alvarez</b>','Forklift Op','Eastport · 1st','9 mo',stat.w('Cert renewal Thu')],['<b>E. Haddad</b>','CNC Operator','Eastport · 1st','7 mo',stat.g('Active')],['<b>T. Okafor</b>','Forklift Op','Eastport · 1st','6 mo',stat.w('Cert renewal Thu')],['<b>G. Mbeki</b>','Assembler II','Eastport · 2nd','5 mo',stat.g('Active')],['<b>U. Sandoval</b>','Forklift Op','Eastport · 3rd','4 mo',stat.g('Active')],['<b>X. Li</b>','Forklift Op','Eastport · 3rd','4 mo',stat.g('Active')]],'+ 120 more · your workers only — competitor rosters are never visible')+
+  `<div class="notice">🔒 This roster is scoped to Summit Staffing Group. Multi-tenant isolation is enforced at the platform level, not the screen level.</div>`})
+};
+function shiftDrill(name,req,filled,rows,note){
+ return {t:`Eastport — ${name}`,s:'Live roster · badge scans + supplier confirmations',b:
+  dkr([['Required',req],['Filled',filled],['Open',req-filled],['No-shows today',name.includes('1st')?2:0],['Fill',Math.round(filled/req*100)+'%']])+
+  `<div class="drill-h3">Roster</div>`+dtbl(['Worker','Agency','Assignment','Status'],rows,`+ ${filled-rows.length>0?filled-rows.length+' more on shift':'full roster in live platform'}`)+
+  `<div class="notice">✦ ${note}</div>`+
+  `<div class="d-actions" style="margin-top:14px"><button class="btn btn-primary" onclick="approve(this,'Backfill request sent to Summit &amp; TalentFlow standby pools')">Request additional backfill</button></div>`};}
+
+function drill(id){
+ const gen=DRILL[id]||(id.startsWith('req-')?()=>reqDrill(id.slice(4)):id.startsWith('inv-')?()=>invDrill(id.slice(4)):id.startsWith('worker-')?()=>workerDrill(id.slice(7)):null);
+ if(!gen)return; const d=gen(); if(!d)return;
+ const m=document.getElementById('modal');
+ m.classList.add('wide');
+ m.innerHTML=`<button class="m-x" onclick="closeModal()">✕</button><h3>${d.t}</h3><div class="m-sub">${d.s}</div>${d.b}`;
+ document.getElementById('modal-wrap').classList.add('open');
+ wireDrills(m);
+}
+const ROWMAP={'Balance Staffing':'agency-balance','Balance':'agency-balance','Summit Staffing':'agency-summit','Summit Staffing Group':'agency-summit','Summit':'agency-summit','TalentFlow Solutions':'agency-talentflow','TalentFlow':'agency-talentflow','IronBridge Workforce':'agency-ironbridge','IronBridge':'agency-ironbridge','J. Alvarez':'worker-alvarez','T. Okafor':'worker-okafor','M. Castillo':'worker-castillo','D. Nguyen':'worker-nguyen'};
+function wireDrills(root){
+ root.querySelectorAll('table.tbl tr').forEach(tr=>{
+   if(tr.dataset.wired)return;
+   const td=tr.querySelector('td');if(!td)return;
+   const t=(td.querySelector('b')||td).textContent.trim();
+   let id=null,m;
+   if(m=t.match(/^REQ-(\d+)/))id='req-'+m[1];
+   else if(m=t.match(/^INV-(\d+)/))id='inv-'+m[1];
+   else if(ROWMAP[t])id=(cur==='sup'&&ROWMAP[t].startsWith('worker'))?ROWMAP[t]:ROWMAP[t];
+   if(!id)return;
+   if(cur==='sup'&&id.startsWith('agency-')&&id!=='agency-summit')return; // tenant isolation
+   tr.classList.add('clickable');tr.dataset.wired=1;tr.title='Click to drill down';
+   tr.addEventListener('click',e=>{if(e.target.closest('button'))return;drill(id)});
+ });
+}
+function wireStatic(){
+ const wire=(sel,ids)=>document.querySelectorAll(sel).forEach((el,i)=>{
+   if(!ids[i]||el.dataset.wired)return;el.dataset.wired=1;el.classList.add('clickable');el.title='Click to drill down';
+   el.addEventListener('click',e=>{if(e.target.closest('button'))return;drill(ids[i])});});
+ wire('#page-exec-home .kpi',['workers','fill','turnover','compliance','spend','invoices']);
+ wire('#page-ops-compliance .kpi',['compliance','compliance','compliance','compliance']);
+ wire('#page-ops-invoices .kpi',['invoices','invoices','invoices','recovered']);
+ wire('#page-sup-home .kpi',['sup-workers']);
+ wire('#page-ops-today .shift',['shift-e1','shift-e2','shift-e3']);
+ wire('#page-exec-home .grid32 .card:nth-child(2) > div',['facility-eastport','facility-southgate']);
+ document.querySelectorAll('#page-exec-home .grid32 .card:nth-child(2) > div.clickable').forEach(el=>el.classList.add('fac-block'));
+ wireDrills(document);
+}
+
+/* ================= VINESSA ================= */
+let vinStarted=false;
+function openVin(playId){
+  document.getElementById('vinessa').classList.add('open');
+  document.getElementById('vin-overlay').classList.add('open');
+  if(!vinStarted){vinStarted=true;vinSay(P[cur].greet);}
+  if(playId)setTimeout(()=>playVin(playId),450);
+}
+function closeVin(){
+  document.getElementById('vinessa').classList.remove('open');
+  document.getElementById('vin-overlay').classList.remove('open');
+}
+function el(tag,cls,html){const e=document.createElement(tag);e.className=cls;e.innerHTML=html;return e}
+function scrollVin(){const b=document.getElementById('vin-body');b.scrollTop=b.scrollHeight}
+function vinSay(html){document.getElementById('vin-body').appendChild(el('div','msg vin',html));scrollVin()}
+function userSay(t){document.getElementById('vin-body').appendChild(el('div','msg user',t));scrollVin()}
+function vinType(cb){
+  const t=el('div','typing','<i></i><i></i><i></i>');
+  document.getElementById('vin-body').appendChild(t);scrollVin();
+  setTimeout(()=>{t.remove();cb()},900+Math.random()*500);
+}
+const actBtn=(label,msg)=>`<button class="btn btn-primary" style="padding:8px 13px;font-size:12px" onclick="approve(this,'${msg}')">${label}</button>`;
+
+const VIN={
+ 'exec-brief':{q:"Walk me through this morning's brief.",a:`Of course. Here's how I'd prioritize your morning:<br><br><b>1. Monday's ramp (urgent, 2:00 PM deadline).</b> Southgate adds 28 positions for week-3 volume. IronBridge holds the reqs but their 48-hour fill rate for this role is 43%. My redistribution plan gets you to 87% confidence of full coverage.<br><br><b>2. The IronBridge question (this week).</b> Their turnover is costing you roughly $28K a month in re-recruiting and lost productivity. The allocation shift I've drafted fixes the incentive without terminating the relationship.<br><br><b>3. INV-2214 (2 minutes).</b> One click holds the disputed $2,178 and releases the clean $41,822 on time.<div class="m-act">${actBtn('Approve all three recommendations','3 decisions executed · suppliers and Finance notified')}</div>`},
+ 'exec-monday':{q:"Will Monday's shifts be fully staffed?",a:`<b>Eastport: yes. Southgate: not without action.</b><table class="m-tbl"><tr><th>Facility · Shift</th><th>Need</th><th>Projected</th><th>Gap</th></tr><tr><td>Eastport · all shifts</td><td>258</td><td>255</td><td style="color:var(--good)">−3 (buffer OK)</td></tr><tr><td>Southgate · 1st</td><td>84</td><td>83</td><td style="color:var(--good)">−1</td></tr><tr><td><b>Southgate · 2nd</b></td><td><b>66</b></td><td><b>54</b></td><td style="color:var(--bad)"><b>−12</b></td></tr></table>The gap traces to REQ-1193: IronBridge has confirmed only 1 of 5, and historically fills 43% of similar reqs in time.<div class="m-rec"><b>My recommendation:</b> approve the redistribution before 2:00 PM. Summit and TalentFlow both have bench candidates in Louisville and can confirm within 48 hours.</div><div class="m-act">${actBtn('Approve redistribution','Redistribution approved — suppliers notified instantly')}</div>`},
+ 'exec-turnover':{q:"Why is turnover up at Southgate?",a:`I analyzed all 41 exits at Southgate over 90 days. Three factors explain 82% of them:<br><br><b>1. Wage drift (largest factor).</b> Local market rate for welders and assemblers rose $1.10/hr in 60 days. Your rate card hasn't moved. 24 of 41 exits went to higher-paying roles within 10 miles.<br><br><b>2. One supplier's sourcing profile.</b> IronBridge placements at Southgate churn at 34% vs 19% for Summit's — they're recruiting from a shallower pool to hit speed targets.<br><br><b>3. 2nd shift weld line.</b> 5 quits in 14 days cluster around one line and supervisor rotation. That's an operational signal, not a staffing one — worth a floor conversation.<div class="m-rec"><b>Recommended:</b> a targeted $1.00/hr adjustment for weld roles (payback ~22 days) plus the allocation shift already in your queue.</div><div class="m-act">${actBtn('Route rate adjustment for approval','Rate adjustment drafted and routed with supporting analysis')}</div>`},
+ 'exec-agencies':{q:"Compare my three agencies.",a:`Here's the 90-day picture, all metrics computed identically:<table class="m-tbl"><tr><th></th><th>Summit</th><th>TalentFlow</th><th>IronBridge</th></tr><tr><td>Fill rate</td><td style="color:var(--good)"><b>94.1%</b></td><td>90.2%</td><td style="color:var(--bad)">84.7%</td></tr><tr><td>Time to fill</td><td style="color:var(--good)"><b>2.1d</b></td><td>2.9d</td><td style="color:var(--bad)">3.8d</td></tr><tr><td>90d turnover</td><td style="color:var(--good)"><b>19.2%</b></td><td>21.8%</td><td style="color:var(--bad)">31.4%</td></tr><tr><td>True cost/hr</td><td style="color:var(--good)"><b>$24.62</b></td><td>$25.71</td><td style="color:var(--bad)">$27.94</td></tr></table><b>The headline:</b> IronBridge has your lowest bill rate and your highest true labor cost. Their turnover adds $5.49 per productive hour that never appears on an invoice.<div class="m-rec"><b>Recommended:</b> shift allocation to 45/35/20 and issue IronBridge a performance plan with specific 60-day targets. I've drafted both.</div><div class="m-act">${actBtn('Approve allocation + performance plan','Allocation updated · performance plan issued to IronBridge')}</div>`},
+ 'exec-spend':{q:"Where can we reduce spend?",a:`Three opportunities, ranked by size and effort:<br><br><b>1. Turnover reduction — ~$86K/quarter.</b> The IronBridge allocation shift. Already drafted, one click.<br><br><b>2. Overtime drift — ~$31K/quarter.</b> OT at Southgate is running 9.2% of hours vs 6.1% at Eastport. Most of it backfills unfilled 2nd-shift seats — filling Monday's ramp properly cuts it structurally.<br><br><b>3. Billing accuracy — ~$12K/quarter.</b> I've caught $38.7K in billing errors YTD. This continues automatically.<br><br>Combined: roughly <b>$129K per quarter, or about 9% of program spend</b> — without cutting a single worker.<div class="m-act">${actBtn('Create savings plan for CFO review','Savings plan generated · shared with Finance')}</div>`},
+ 'exec-compliance':{q:"Show me the compliance details.",a:`14 forklift (PIT) certifications expire within 10 days — all at Eastport Materials Handling, all workers on active assignments.<br><br>If they lapse: those workers are legally off the trucks, and Receiving Lines 1–2 run at roughly 60% capacity from Monday week.<br><br>I've held renewal slots with your certified training vendor, sequenced around posted shifts so <b>zero scheduled hours are lost</b>. Cost: $2,940 total. Cost of a one-week lapse: ~$18K in throughput.<div class="m-act">${actBtn('Initiate all 14 renewals','Renewals initiated · workers and suppliers notified')}</div>`},
+ 'ops-monday':{q:"Will Monday be covered?",a:`Eastport is fine — your buffer holds. <b>Southgate 2nd shift is projected 12 short</b> against the week-3 ramp.<br><br>The fix is already drafted: redistribute REQ-1193's remaining seats to Summit (14) and TalentFlow (9), keep IronBridge at 5. Both partners have Louisville bench candidates and confirm within 48 hours.<div class="m-rec"><b>If you approve by 2:00 PM today,</b> I project 26–28 of 28 seats confirmed by Friday EOD.</div><div class="m-act">${actBtn('Open the distribution plan','Distribution plan opened')} <button class="btn btn-ghost" style="padding:8px 13px;font-size:12px" onclick="closeVin();showPage('ops-reqs');setTimeout(openModal,300)">View in Requisitions</button></div>`},
+ 'ops-draft':{q:"Draft a req for 20 assemblers at Eastport.",a:`Done — here's the draft:<table class="m-tbl"><tr><td><b>Role</b></td><td>Assembler II</td></tr><tr><td><b>Facility</b></td><td>Eastport · Line 4 expansion</td></tr><tr><td><b>Positions</b></td><td>20 · 1st shift · start Mon, Jul 27</td></tr><tr><td><b>Rate</b></td><td>$21.50/hr (your approved rate card)</td></tr><tr><td><b>Requirements</b></td><td>OSHA-10 · 6+ mo assembly experience</td></tr><tr><td><b>Distribution</b></td><td>Summit 9 · TalentFlow 7 · IronBridge 4<div style='font-size:11px;color:var(--muted)'>Balance excluded — they staff Southgate only; this req is Eastport</div></td></tr></table>Distribution follows current allocation rules and each partner's 1st-shift fill history. Approval routes to Dana automatically since it exceeds 15 positions.<div class="m-act">${actBtn('Submit for approval','REQ-1194 created · routed to Dana Whitfield for approval')}</div>`},
+ 'ops-turnover':{q:"What's driving the weld dept quits?",a:`Five quits in 14 days, all IronBridge placements under 30 days tenure, all 2nd-shift weld. Three converging causes:<br><br><b>Wages:</b> local weld market moved $1.10/hr in 60 days; your card didn't. Two exit surveys cite pay directly.<br><br><b>Sourcing:</b> IronBridge's weld candidates average 8 months experience vs 19 for Summit's — early-tenure churn follows.<br><br><b>The line itself:</b> quits cluster around one line and supervisor rotation. Worth a floor conversation — that part isn't a staffing problem.<div class="m-rec"><b>Recommended:</b> $1.00/hr targeted adjustment (payback ~22 days) + route new weld reqs to Summit until IronBridge's retention recovers.</div><div class="m-act">${actBtn('Propose both to Dana','Proposal routed to Dana with full analysis attached')}</div>`},
+ 'ops-cands':{q:"Review the CNC candidates.",a:`Six candidates for REQ-1187, screened against certifications, shift fit, and prior tenure:<table class="m-tbl"><tr><th>Candidate</th><th>Agency</th><th>Fit</th></tr><tr><td>R. Delgado</td><td>Summit</td><td style="color:var(--good)"><b>96 — fast-track</b></td></tr><tr><td>K. Barnes</td><td>Summit</td><td style="color:var(--good)"><b>93 — fast-track</b></td></tr><tr><td>A. Osei</td><td>TalentFlow</td><td style="color:var(--good)"><b>91 — fast-track</b></td></tr><tr><td>L. Tran</td><td>Summit</td><td style="color:var(--good)"><b>88 — fast-track</b></td></tr><tr><td>J. Whitm.</td><td>TalentFlow</td><td style="color:var(--warn)">Pending OSHA-10 verify</td></tr><tr><td>S. Patel</td><td>Summit</td><td style="color:var(--warn)">Pending OSHA-10 verify</td></tr></table>Fit scores weight certifications, comparable line experience, and predicted 90-day retention.<div class="m-act">${actBtn('Fast-track top 4','4 candidates fast-tracked · onboarding initiated')}</div>`},
+ 'ops-invoice':{q:"Which invoices need my review?",a:`Only two of seven — I reconciled the rest clean against approved time, badge data, and contracted rates:<br><br><b>INV-2214 (TalentFlow, $44,000):</b> 37 OT hours billed with no matching timesheet approvals — $2,178 in question. Recommend hold &amp; dispute; release the clean $41,822 on time.<br><br><b>INV-2215 (IronBridge, $31,890):</b> two workers billed above contracted rate — $1,026 variance. Recommend requesting a corrected invoice.<br><br>The other five ($263,090) are one click to release.<div class="m-act">${actBtn('Execute all recommendations','2 disputes filed · 5 clean invoices released for payment')}</div>`},
+ 'sup-priority':{q:"Which reqs should I prioritize?",a:`<b>REQ-1191 is everything this week.</b> 14 Assembler II seats at Southgate, 2nd shift, starting Monday — your largest allocation in this program, awarded on your fill performance.<br><br>You've confirmed 9. For the last 5, I've shortlisted <b>11 bench candidates</b> in the Louisville area with matching shift availability, ranked by predicted 90-day retention.<br><br>Second priority: REQ-1185 (1 forklift seat left) — but note the candidate needs current PIT certification uploaded before Meridian can review.<div class="m-rec"><b>Worth knowing:</b> Meridian's allocation grows automatically for partners who deliver. Fill these 5 by Friday and your program share is positioned to grow again next cycle.</div><div class="m-act">${actBtn('Send shortlist to my recruiters','Shortlist sent · recruiters notified with ranked candidates')}</div>`},
+ 'sup-trend':{q:"How is my performance trending?",a:`Strong quarter, Priya:<table class="m-tbl"><tr><th>Metric</th><th>You</th><th>Program avg</th><th>Trend</th></tr><tr><td>Fill rate</td><td><b>94.1%</b></td><td>89.7%</td><td style="color:var(--good)">▲ +1.8</td></tr><tr><td>Time to fill</td><td><b>2.1d</b></td><td>2.9d</td><td style="color:var(--good)">▲ faster</td></tr><tr><td>90d retention</td><td><b>80.8%</b></td><td>75.9%</td><td style="color:var(--good)">▲ +2.1</td></tr><tr><td>Submittal ratio</td><td>2.4:1</td><td>2.2:1</td><td style="color:var(--warn)">▼ watch</td></tr></table>You're #1 of 4 on every metric except submittal-to-hire ratio. Tightening screening on assembly roles would close that — your submissions that miss are mostly shift-availability mismatches, which I can flag before you submit.<div class="m-act">${actBtn('Enable pre-submission shift checks','Pre-submission checks enabled for all Meridian reqs')}</div>`},
+ 'sup-pay':{q:"When do my invoices pay?",a:`Both current invoices reconciled clean and are approved:<table class="m-tbl"><tr><th>Invoice</th><th>Amount</th><th>Status</th></tr><tr><td>INV-2209 · Eastport</td><td>$96,410</td><td style="color:var(--good)">Pays Fri, Jul 17</td></tr><tr><td>INV-2210 · Southgate</td><td>$41,220</td><td style="color:var(--good)">Pays Fri, Jul 17</td></tr></table>Because your billing matched approved time exactly, both cleared VINessa reconciliation with zero touches — that's 11 consecutive clean weeks, which keeps you on the fastest payment track.`}
+};
+
+function playVin(id){
+  openVin();
+  const r=VIN[id];if(!r)return;
+  userSay(r.q);
+  vinType(()=>vinSay(r.a));
+}
+function sendVin(){
+  const inp=document.getElementById('vin-text');
+  const t=inp.value.trim();if(!t)return;inp.value='';
+  userSay(t);
+  const s=t.toLowerCase();
+  const pick=
+    s.match(/monday|staff|fill|cover|shift/)? (cur==='ops'?'ops-monday':'exec-monday'):
+    s.match(/turnover|quit|churn|retention/)? (cur==='ops'?'ops-turnover':cur==='sup'?'sup-trend':'exec-turnover'):
+    s.match(/agenc|supplier|vendor|compare|partner/)? (cur==='sup'?'sup-trend':'exec-agencies'):
+    s.match(/invoice|pay|bill/)? (cur==='sup'?'sup-pay':'ops-invoice'):
+    s.match(/complian|cert|document|audit/)? 'exec-compliance':
+    s.match(/spend|cost|save|budget/)? 'exec-spend':
+    s.match(/req|draft|position|assembler|hire/)? (cur==='sup'?'sup-priority':'ops-draft'):
+    s.match(/priorit/)? (cur==='sup'?'sup-priority':'exec-brief'):null;
+  vinType(()=>{
+    if(pick)vinSay(VIN[pick].a);
+    else vinSay(`In the live platform I'd answer that directly from your connected data — requisitions, time, invoices, market rates, and supplier activity across your program. For this demonstration, try one of the suggested questions below, or ask about <b>staffing coverage, turnover, supplier comparison, compliance, invoices, or spend</b>.`);
+  });
+}
+
+
+/* ================= THEME (merged) ================= */
+let theme = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+function applyTheme(){document.documentElement.dataset.theme=theme;document.querySelectorAll('.mode-btn').forEach(b=>b.textContent=theme==='dark'?'\u2600\uFE0F':'\uD83C\uDF19');}
+function toggleTheme(){theme=theme==='dark'?'light':'dark';applyTheme();}
+applyTheme();
+
+/* ================= WIDGETS (merged) ================= */
+const WIDGETS={
+ coverage:{t:'Coverage today',d:"Today's fill by facility, live from supplier confirmations \u2014 spot a thin shift at a glance.",
+  b:`<div class="wrow"><span>Eastport Plant</span><span class="wv">248 / 258 <span class="pill g" style="margin-left:6px">96%</span></span></div><div class="wrow"><span>Southgate Plant</span><span class="wv">133 / 140 <span class="pill w" style="margin-left:6px">95%</span></span></div><div class="wrow"><span>Next risk window</span><span class="wv" style="color:var(--warn)">Mon \u00b7 SG 2nd shift</span></div>`},
+ turnover:{t:'Turnover trend',d:'90-day turnover with the 6-month trajectory \u2014 the driver analysis is one click away in VINessa.',
+  b:`<div class="wbig">24.1%</div><div class="wsub">90-day \u00b7 \u25b2 1.8 pts \u00b7 driver analysis drafted</div><div class="wbars"><div class="wb"><i style="height:91%"></i><span>Feb</span></div><div class="wb"><i style="height:93%"></i><span>Mar</span></div><div class="wb"><i style="height:95%"></i><span>Apr</span></div><div class="wb"><i style="height:97%"></i><span>May</span></div><div class="wb"><i style="height:98%"></i><span>Jun</span></div><div class="wb"><i style="height:100%"></i><span>Jul</span></div></div>`},
+ overtime:{t:'Overtime share',d:'OT as a share of hours by facility, against your 6.5% target \u2014 structural vs. cosmetic OT is visible here.',
+  b:`<div class="wrow"><span>Eastport Plant</span><span class="wv">6.1% <span class="pill g" style="margin-left:6px">under target</span></span></div><div class="wrow"><span>Southgate Plant</span><span class="wv">9.2% <span class="pill w" style="margin-left:6px">watch</span></span></div><div class="wrow"><span>Program \u00b7 target 6.5%</span><span class="wv">7.3%</span></div>`},
+ compliance:{t:'Compliance pulse',d:'Expirations and blocks across every worker and document \u2014 before they reach your floor.',
+  b:`<div class="wbig">334 / 347</div><div class="wsub">workers fully compliant \u00b7 96.2%</div><div class="wrow" style="margin-top:8px"><span>Expiring \u226410 days</span><span class="wv" style="color:var(--warn)">14 \u00b7 renewals drafted</span></div><div class="wrow"><span>Missing documents</span><span class="wv" style="color:var(--bad)">3 \u00b7 blocked from schedule</span></div>`},
+ invoices:{t:'Invoice pipeline',d:'Reconciliation status of every pending invoice \u2014 clean ones are one click to release.',
+  b:`<div class="wrow"><span>Pending approval</span><span class="wv">$318K \u00b7 7 invoices</span></div><div class="wrow"><span>Reconciled clean</span><span class="wv" style="color:var(--good)">5 of 7</span></div><div class="wrow"><span>Exceptions flagged</span><span class="wv" style="color:var(--warn)">$3,204</span></div><div class="wrow"><span>Next pay run</span><span class="wv">Fri, Jul 17</span></div>`},
+ headcount:{t:'Headcount trend',d:'Active contingent workers over six months \u2014 growth and drift, visible at a glance.',
+  b:`<div class="wbig">347</div><div class="wsub">active workers \u00b7 \u25b2 41 this month</div><div class="wbars"><div class="wb"><i style="height:68%"></i><span>Feb</span></div><div class="wb"><i style="height:75%"></i><span>Mar</span></div><div class="wb"><i style="height:81%"></i><span>Apr</span></div><div class="wb"><i style="height:88%"></i><span>May</span></div><div class="wb"><i style="height:92%"></i><span>Jun</span></div><div class="wb"><i style="height:100%"></i><span>Jul</span></div></div>`},
+ savings:{t:'Savings tracker',d:'What VINessa has recovered and identified \u2014 the quiet ROI ledger for your program.',
+  b:`<div class="wrow"><span>Billing errors recovered YTD</span><span class="wv" style="color:var(--good)">$38.7K</span></div><div class="wrow"><span>Turnover cost avoided YTD</span><span class="wv" style="color:var(--good)">$212K</span></div><div class="wrow"><span>Drafted savings plan</span><span class="wv" style="color:var(--blue)">$129K / qtr</span></div>`}
+};
+let addedW=['coverage'];
+function renderWidgets(){const g=document.getElementById('customWidgets');if(!g)return;
+ g.innerHTML=addedW.map(k=>{const w=WIDGETS[k];
+  return `<div class="wcard"><button class="w-x" title="Remove widget" onclick="removeWidget('${k}')">\u2715</button><div class="wtitle">${w.t}</div>${w.b}</div>`;}).join('')
+  +`<button class="add-tile" onclick="openWidgetPicker()">\uFF0B Add a widget</button>`;}
+function removeWidget(k){addedW=addedW.filter(x=>x!==k);renderWidgets();toast(WIDGETS[k].t+' removed from your command center');}
+function addWidget(k){if(!addedW.includes(k))addedW.push(k);renderWidgets();openWidgetPicker();toast(WIDGETS[k].t+' added — find it under \u201CYour widgets\u201D below');}
+function openWidgetPicker(){const m=document.getElementById('modal');m.classList.remove('wide');
+ m.innerHTML=`<button class="m-x" onclick="closeModal()">\u2715</button><h3>Add a widget</h3><div class="m-sub">Shown on your command center \u00b7 VINessa keeps each one current and flags anything unusual up top</div>`
+  +Object.entries(WIDGETS).map(([k,w])=>`<div class="picker-item"><div style="min-width:0"><div class="pt">${w.t}</div><div class="pd">${w.d}</div></div><div class="pa">${addedW.includes(k)?'<span class="pill g">\u2713 Added</span>':`<button class="btn btn-ghost" onclick="addWidget('${k}')">Add</button>`}</div></div>`).join('');
+ document.getElementById('modal-wrap').classList.add('open');}
+
+/* ================= APEX — provider not on VIN (merged) ================= */
+function inviteApex(){const b=document.getElementById('apexBadge');b.className='pill g';b.textContent='Invitation sent';
+ document.getElementById('apexAct').innerHTML='<span style="font-size:12px;color:var(--muted)">Invitation sent \u2014 their slice goes live when they join. Withdraw anytime.</span>';
+ toast('Apex Labor Group invited to the program on VIN');}
+
+
+/* ================= CLIENT VIEWS (restored) ================= */
+const AGDOT={Summit:'#0d9488',Balance:'#1f66f0',TalentFlow:'#7c3aed',IronBridge:'#d97706'};
+const MROSTER=[
+ ['C. Romero','Summit','Assembler II','Southgate','2nd','Jul 24','ending','w','Ends Jul 24'],
+ ['B. Kowalski','Summit','Assembler II','Eastport','1st','—','active','g','Active'],
+ ['I. Petrov','IronBridge','Welder','Southgate','2nd','—','attention','w','Turnover watch'],
+ ['V. Ramos','TalentFlow','Quality Insp.','Southgate','1st','—','active','g','Active'],
+ ['J. Alvarez','Summit','Forklift Op','Eastport','1st','—','attention','w','Cert renewal Thu'],
+ ['W. Chen','TalentFlow','Assembler II','Eastport','2nd','—','active','g','Active'],
+ ['E. Haddad','Summit','CNC Operator','Eastport','1st','—','active','g','Active'],
+ ['Q. Farah','IronBridge','Material Handler','Eastport','3rd','—','active','g','Active'],
+ ['T. Okafor','Summit','Forklift Op','Eastport','1st','—','attention','w','Cert renewal Thu'],
+ ['M. Castillo','IronBridge','Forklift Op','Eastport','2nd','—','attention','w','Cert renewal Fri'],
+ ['D. Nguyen','TalentFlow','Forklift Op','Eastport','1st','—','attention','w','Cert renewal Fri'],
+ ['G. Mbeki','Summit','Assembler II','Eastport','2nd','—','active','g','Active'],
+ ['H. Yoder','Summit','CNC Operator','Eastport','2nd','—','active','g','Active'],
+ ['U. Sandoval','Summit','Forklift Op','Eastport','3rd','—','active','g','Active'],
+ ['X. Li','Summit','Forklift Op','Eastport','3rd','—','active','g','Active'],
+ ['K. Brandt','TalentFlow','Assembler II','Eastport','3rd','Jul 31','ending','r','Ends Jul 31 · no backfill'],
+ ['F. Abebe','TalentFlow','Quality Insp.','Eastport','2nd','—','active','g','Active'],
+ ['M. Beaumont','TalentFlow','Quality Insp.','Southgate','1st','—','active','g','Active'],
+ ['A. Kaur','TalentFlow','Quality Insp.','Southgate','1st','—','active','g','Active'],
+ ['R. Ostrowski','TalentFlow','Quality Insp.','Southgate','1st','—','active','g','Active'],
+ ['L. Novak','IronBridge','Assembler II','Eastport','1st','—','active','g','Active'],
+ ['R. Vance','IronBridge','Assembler II','Eastport','1st','—','attention','r','Blocked · OSHA-10 missing'],
+ ['T. Adeyemi','IronBridge','Assembler II','Southgate','1st','—','attention','r','Blocked · OSHA-10 missing'],
+ ['M. Osei','TalentFlow','Quality Insp.','Eastport','1st','—','active','g','Active'],
+ ['J. Whitcomb','Balance','Assembler II','Southgate','1st','—','active','g','Active'],
+ ['R. Salazar','Balance','Material Handler','Southgate','1st','—','active','g','Active'],
+ ['P. Lindgren','Balance','Quality Insp.','Southgate','2nd','—','active','g','Active'],
+ ['S. Ahmadi','Balance','Material Handler','Southgate','3rd','—','active','g','Active']
+];
+let rosterSeg='all';
+function setRosterSeg(f,btn){rosterSeg=f;document.querySelectorAll('#rSeg button').forEach(b=>b.classList.toggle('on',b===btn));renderOpsRoster();}
+function renderOpsRoster(){
+ const tb=document.getElementById('opsRosterRows');if(!tb)return;
+ const p=document.getElementById('rPartner').value,f=document.getElementById('rFac').value,s=document.getElementById('rShift').value;
+ const rows=MROSTER.filter(r=>(p==='all'||r[1]===p)&&(f==='all'||r[3]===f)&&(s==='all'||r[4]===s)&&(rosterSeg==='all'||r[6]===rosterSeg));
+ document.getElementById('rCount').textContent='Showing '+rows.length+' of 421 · 28-worker sample in this demo';
+ tb.innerHTML=rows.length?rows.map(r=>`<tr><td><b>${r[0]}</b></td><td><span class="agency-dot" style="background:${AGDOT[r[1]]}"></span>${r[1]}</td><td>${r[2]}</td><td>${r[3]} · ${r[4]}</td><td>${r[5]}</td><td><span class="pill ${r[7]}">${r[8]}</span></td></tr>`).join('')
+  :'<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:22px">No workers match these filters.</td></tr>';
+ wireDrills(tb.closest('.card'));
+}
+
+/* ---- client-initiated requisition intake ---- */
+let reqCounter=1194, submittedReqs=[];
+function renderSubmittedReqs(){
+ const tb=document.getElementById('submittedReqs');if(!tb)return;
+ tb.innerHTML=submittedReqs.length?submittedReqs.map(s=>`<tr><td><b>${s.id}</b><div style="margin-top:3px"><span class="tag-cs">Client-submitted</span></div></td><td>${s.role} · ${s.fac} · ${s.shift}</td><td>${s.pos}</td><td>${s.dist}</td><td>${s.when}</td><td><span class="pill b">Distributed · partners notified</span></td></tr>`).join('')
+  :'<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:22px">Nothing submitted yet this session — use <b style="color:var(--heading)">Open a requisition</b> above, or ask VINessa to draft one.</td></tr>';
+}
+function openNewReq(kind){
+ const pre = kind==='backfill'
+   ? {role:'Assembler II',pos:1,fac:'Eastport',shift:'3rd',by:'Fri, Jul 31',notes:'Backfill for K. Brandt — assignment ends Jul 31, seat still needed.',hint:"I pre-filled this backfill for K. Brandt's seat. TalentFlow filled the original assignment; distribution is set to your allocation rules — change anything before it goes."}
+   : {role:'Assembler II',pos:1,fac:'Eastport',shift:'1st',by:'Mon, Jul 27',notes:'',hint:"I'll structure this into a clean requisition and distribute it under your allocation rules. You review, then submit — partners are notified the moment you do."};
+ const roles=['Assembler II','CNC Machine Operator','Forklift Operator (PIT)','Quality Inspector','Material Handler','Welder','Sanitation Associate'];
+ const m=document.getElementById('modal');m.classList.remove('wide');
+ m.innerHTML=`<button class="m-x" onclick="closeModal()">✕</button><h3>${kind==='backfill'?'Open a backfill requisition':'Open a requisition'}</h3>
+  <div class="m-sub">Routes into your partners' pipelines · tagged client-submitted</div>
+  <div class="notice">✦ ${pre.hint}</div>
+  <div class="field"><label>Role needed</label><select id="nr_role">${roles.map(r=>`<option ${pre.role===r?'selected':''}>${r}</option>`).join('')}</select></div>
+  <div class="two-col">
+    <div class="field"><label>Positions</label><input id="nr_pos" type="number" min="1" value="${pre.pos}"></div>
+    <div class="field"><label>Shift</label><select id="nr_shift"><option ${pre.shift==='1st'?'selected':''}>1st</option><option ${pre.shift==='2nd'?'selected':''}>2nd</option><option ${pre.shift==='3rd'?'selected':''}>3rd</option></select></div>
+  </div>
+  <div class="two-col">
+    <div class="field"><label>Facility</label><select id="nr_fac"><option ${pre.fac==='Eastport'?'selected':''}>Eastport</option><option ${pre.fac==='Southgate'?'selected':''}>Southgate</option></select></div>
+    <div class="field"><label>Need by</label><input id="nr_by" type="text" value="${pre.by}"></div>
+  </div>
+  <div class="field"><label>Distribution</label><select id="nr_dist">
+    <option value="Auto · allocation rules">Auto — your allocation rules across all four partners (recommended)</option>
+    <option>Summit Staffing only</option><option>Balance Staffing only</option><option>TalentFlow Solutions only</option><option>IronBridge Workforce only</option></select>
+    <div style="font-size:11px;color:var(--muted);margin-top:5px">VINessa recommends Auto — it routes by each partner's demonstrated fill history for this role and shift.</div></div>
+  <div class="field"><label>Notes for partners</label><textarea id="nr_notes" rows="2" placeholder="Anything recruiters should know…">${pre.notes}</textarea></div>
+  <div class="d-actions" style="margin-top:14px"><button class="btn btn-primary" onclick="submitNewReq()">Submit requisition</button><button class="btn btn-ghost" onclick="closeModal()">Cancel</button></div>`;
+ document.getElementById('modal-wrap').classList.add('open');
+}
+function submitNewReq(){
+ reqCounter++;const id='REQ-'+reqCounter;
+ const s={id,role:document.getElementById('nr_role').value,pos:document.getElementById('nr_pos').value||1,
+  fac:document.getElementById('nr_fac').value,shift:document.getElementById('nr_shift').value+' shift',
+  by:document.getElementById('nr_by').value,dist:document.getElementById('nr_dist').value,when:'Just now'};
+ submittedReqs.unshift(s);renderSubmittedReqs();
+ const m=document.getElementById('modal');
+ m.innerHTML=`<button class="m-x" onclick="closeModal()">✕</button>
+  <div style="text-align:center;padding:16px 6px">
+   <div style="width:62px;height:62px;border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;background:var(--goodbg);border:1px solid var(--goodline);font-size:26px;color:var(--good)">✓</div>
+   <h3 style="margin-bottom:6px">${id} is in your partners' pipelines</h3>
+   <div style="color:var(--muted);font-size:13px;max-width:400px;margin:0 auto 16px;line-height:1.55">${s.pos} × ${s.role} · ${s.fac} · ${s.shift} · need by ${s.by}<br>Distribution: <b style="color:var(--heading)">${s.dist}</b> · tagged <span class="tag-cs">Client-submitted</span><br>Partners were notified instantly — confirmations will land in Requisitions in real time.</div>
+   <div class="d-actions" style="justify-content:center"><button class="btn btn-ghost" onclick="closeModal()">Close</button><button class="btn btn-primary" onclick="closeModal();showPage('ops-reqs')">View requisitions</button></div>
+  </div>`;
+ toast(id+' distributed · tagged client-submitted');
+}
+
+/* ================= MODIFY A RECOMMENDATION ================= */
+const numIn=(id,v,max)=>`<input id="${id}" type="number" min="0" max="${max||99}" value="${v}" oninput="updMod()" style="width:76px;background:var(--field);border:1px solid var(--line);border-radius:8px;color:var(--heading);padding:8px 10px;font-size:14px;font-weight:700;font-family:inherit;text-align:center">`;
+const MODS={
+ monday:()=>`<h3>Modify — Monday redistribution</h3><div class="m-sub">28 Assembler II positions · Southgate 2nd shift · start Mon, Jul 20</div>
+  <div class="notice">✦ <b>VINessa's basis:</b> the 14 / 9 / 5 split follows each partner's actual 48-hour fill rate for this exact role and shift (Summit 91%, TalentFlow 78%, IronBridge 43%). Adjust the seats — I'll tell you what it does to confidence.</div>
+  <div class="alloc">
+    <div class="a-row"><div class="a-name"><span class="agency-dot" style="background:#0d9488"></span>Summit Staffing</div><div class="a-bar"></div>${numIn('mS',14,28)}</div>
+    <div class="a-row"><div class="a-name"><span class="agency-dot" style="background:#7c3aed"></span>TalentFlow Solutions</div><div class="a-bar"></div>${numIn('mT',9,28)}</div>
+    <div class="a-row"><div class="a-name"><span class="agency-dot" style="background:#d97706"></span>IronBridge Workforce</div><div class="a-bar"></div>${numIn('mI',5,28)}</div>
+  </div>
+  <div class="d-rec" id="modNote"><b>Projection:</b> 26–28 of 28 confirmed by Friday EOD · <b>87% confidence</b>.</div>
+  <div class="d-actions" style="margin-top:14px"><button class="btn btn-primary" onclick="saveMod('Adjusted redistribution saved — will apply when you approve')">Save adjustments</button><button class="btn btn-ghost" onclick="closeModal()">Cancel</button></div>`,
+ alloc:()=>`<h3>Modify — default req allocation</h3><div class="m-sub">Where new requisitions flow for the next 90 days · must total 100%</div>
+  <div class="notice">✦ <b>VINessa's basis:</b> 45 / 35 / 20 weights each partner's fill speed, retention, and compliance. IronBridge below 25% is what produces the <b>$86K quarterly saving</b>.</div>
+  <div class="alloc">
+    <div class="a-row"><div class="a-name"><span class="agency-dot" style="background:#0d9488"></span>Summit Staffing</div><div class="a-bar"></div>${numIn('mS',45,100)}</div>
+    <div class="a-row"><div class="a-name"><span class="agency-dot" style="background:#7c3aed"></span>TalentFlow Solutions</div><div class="a-bar"></div>${numIn('mT',35,100)}</div>
+    <div class="a-row"><div class="a-name"><span class="agency-dot" style="background:#d97706"></span>IronBridge Workforce</div><div class="a-bar"></div>${numIn('mI',20,100)}</div>
+  </div>
+  <div class="d-rec" id="modNote"><b>Projected impact:</b> +2.3 pts fill · −4.1 pts turnover · <b>$86K saved / quarter</b>.</div>
+  <div class="d-actions" style="margin-top:14px"><button class="btn btn-primary" onclick="saveMod('Adjusted allocation saved — will apply when you approve')">Save adjustments</button><button class="btn btn-ghost" onclick="closeModal()">Cancel</button></div>`,
+ invoice:()=>`<h3>Modify — INV-2214 hold amount</h3><div class="m-sub">TalentFlow · Jul 1–7 · invoice total $44,000</div>
+  <div class="notice">✦ <b>VINessa's basis:</b> 37 OT hours ($1,324) plus weekend differential on those hours ($854) have no matching timesheet approvals — $2,178 total in question.</div>
+  <div style="display:flex;align-items:center;gap:12px;margin:16px 0">
+    <div style="font-size:13px;font-weight:600;color:var(--heading);width:140px">Amount to hold</div>
+    <span style="color:var(--muted)">$</span>${numIn('mH',2178,44000)}
+  </div>
+  <div class="d-rec" id="modNote">Releasing <b>$41,822</b> for on-time payment · dispute auto-generated with reconciliation attached.</div>
+  <div class="d-actions" style="margin-top:14px"><button class="btn btn-primary" onclick="saveMod('Hold amount updated — dispute will reflect your adjustment')">Save adjustments</button><button class="btn btn-ghost" onclick="closeModal()">Cancel</button></div>`,
+ renewals:()=>`<h3>Modify — certification renewals</h3><div class="m-sub">14 forklift (PIT) certifications · Eastport Materials Handling</div>
+  <div class="notice">✦ <b>VINessa's basis:</b> slots held with your certified training vendor, sequenced around posted shifts — zero lost hours, $2,940 total.</div>
+  <div class="field"><label>Scheduling</label><select id="mSch"><option>Around posted shifts (recommended · zero lost hours)</option><option>All on one day (faster · ~9 lost shift-hours)</option><option>Defer one week (risk: 4 certs lapse)</option></select></div>
+  <div class="field"><label>Training vendor</label><select id="mVen"><option>Certified vendor · $2,940 (current)</option><option>Alt vendor · $3,400 · completes 2 days sooner</option></select></div>
+  <div class="d-rec">However you set it, non-compliant workers stay blocked from schedules automatically until renewed.</div>
+  <div class="d-actions" style="margin-top:14px"><button class="btn btn-primary" onclick="saveMod('Renewal plan updated — will apply when you initiate')">Save adjustments</button><button class="btn btn-ghost" onclick="closeModal()">Cancel</button></div>`
+};
+let curMod=null;
+function modifyDecision(k){curMod=k;const m=document.getElementById('modal');m.classList.remove('wide');
+ m.innerHTML='<button class="m-x" onclick="closeModal()">✕</button>'+MODS[k]();
+ document.getElementById('modal-wrap').classList.add('open');
+ ['mS','mT','mI','mH'].forEach(id=>{const e=document.getElementById(id);if(e)e.addEventListener('input',updMod);});}
+function updMod(){
+ const n=document.getElementById('modNote');if(!n)return;
+ const v=id=>{const e=document.getElementById(id);return e?+e.value||0:0;};
+ if(curMod==='monday'){const t=v('mS')+v('mT')+v('mI');
+  n.innerHTML = t!==28?`<b style="color:var(--bad)">Allocations total ${t} of 28</b> — adjust to cover the full ramp.`
+   : v('mI')>5?`<b>Projection:</b> ~${28-Math.round((v('mI')-5)*0.6)}–28 of 28 by Friday · <b style="color:var(--warn)">confidence drops to ~${Math.max(52,87-(v('mI')-5)*7)}%</b> — IronBridge fills 43% of similar reqs in time.`
+   : `<b>Projection:</b> 26–28 of 28 confirmed by Friday EOD · <b>87% confidence</b>.`;}
+ else if(curMod==='alloc'){const t=v('mS')+v('mT')+v('mI');
+  n.innerHTML = t!==100?`<b style="color:var(--bad)">Allocation totals ${t}%</b> — must equal 100%.`
+   : v('mI')>25?`<b>Projected impact:</b> savings shrink to ~<b style="color:var(--warn)">$${Math.max(12,86-(v('mI')-20)*5)}K / quarter</b> — IronBridge share above 25% keeps churn cost in the program.`
+   : `<b>Projected impact:</b> +2.3 pts fill · −4.1 pts turnover · <b>$${86+(20-v('mI'))*2}K saved / quarter</b>.`;}
+ else if(curMod==='invoice'){const h=Math.min(44000,v('mH'));
+  n.innerHTML=`Releasing <b>$${(44000-h).toLocaleString()}</b> for on-time payment · dispute auto-generated for <b>$${h.toLocaleString()}</b> with reconciliation attached.${h<2178?' <b style="color:var(--warn)">Note:</b> this releases some unapproved OT — I\u2019ll log that you accepted it.':''}`;}
+}
+function saveMod(msg){toast(msg);closeModal();}
+
+wireStatic();
+renderWidgets();
+renderOpsRoster();
+renderSubmittedReqs();
+</script>
+</body>
+</html>
